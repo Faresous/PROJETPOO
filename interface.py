@@ -1,8 +1,8 @@
-# interface_blueprince_sidebar.py
+# interface_blueprince
 import os, sys
 import pygame as pg
 
-# --- Grille Blue Prince
+""" Grille Blue Prince """
 ROWS, COLS = 9, 5
 CELL, GAP, PAD = 64, 4, 40
 BOARD_W = COLS * (CELL + GAP) + PAD * 2 - GAP
@@ -85,18 +85,8 @@ def load_png(name, size):
     surf = pg.image.load(path).convert_alpha()
     return pg.transform.smoothscale(surf, (size, size))
 
-""" télécharger les images des chambres"""
-def load_img(name, size):
-    path = os.path.join(ASSETS, name)
-    try:
-        surf = pg.image.load(path).convert_alpha()
-        return pg.transform.smoothscale(surf, (size, size))
-    except Exception:
-        return None
-    return None
 
-
-def draw_board(screen, rooms, cursor, img_entree, img_anti):
+def draw_board(screen, rooms, font, cursor, img_entree, img_anti):
     """ Construire le plateau de jeu à gauche de l'écran
 
     Args:
@@ -312,7 +302,11 @@ def main():
                         rooms[r][c] ^= 1
 
         # Dessin
+<<<<<<< HEAD
         draw_board(screen, rooms, cursor, img_entree, img_anti)
+=======
+        draw_board(screen, rooms, tuple(cursor), cursor, img_entree, img_anti)
+>>>>>>> 97cefceedf6b7a4308079d513a2e069677ea9d25
         room_label = current_room_name(tuple(cursor), rooms)
         draw_sidebar(screen, font, big, inventory, room_label, icons)
 
