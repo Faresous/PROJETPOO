@@ -13,6 +13,8 @@ W = BOARD_W + SIDEBAR_W
 H = BOARD_H + 72
 FPS = 60
 
+""" taille de l'icone de chaque item (inventaire) """
+INV_ICON = 32
 # Couleurs
 BG1        = (255, 255, 255)   # fond global blanc pour l'inventaire
 BG2        = (0, 0, 0)         # fond noir pour le plateau de jeux
@@ -21,11 +23,11 @@ MUTED     = (120, 120, 120)
 CURSOR    = (120, 185, 255)
 ROOM_COL  = (70, 160, 120)
 
-# Positions fixes
+""" Position des chambres fixe (entrée + anti-chambre) """
 ENTRY_POS = (ROWS - 1, COLS // 2)   # bas milieu
 ANTI_POS  = (0,         COLS // 2)  # haut milieu
 
-# Dossiers
+""" Icon de chaque chambre ou objet """
 BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
 
@@ -44,6 +46,14 @@ def pos_from_mouse(mx, my, x0=0, y0=0):
                 return (r, c)
     return None
 
+""" télécharger les icones de l'inventaire """
+
+def load_png(name, size):
+    path = os.path.join(ASSETS, name)
+    surf = pg.image.load(path).convert_alpha()
+    return pg.transform.smoothscale(surf, (size, size))
+
+""" télécharger les images des chambres"""
 def load_img(name, size):
     path = os.path.join(ASSETS, name)
     try:
@@ -52,6 +62,9 @@ def load_img(name, size):
     except Exception:
         return None
 
+    return None
+
+""" Cette fonction nous permet de constituer notre plateau de jeux, qui se trouve à gauche de l'écran"""
 def draw_board(screen, rooms, cursor, font, img_entree, img_anti):
     # zone plateau = gauche
     screen.fill(BG2, pg.Rect(0, 0, BOARD_W, H))
@@ -81,6 +94,7 @@ def draw_board(screen, rooms, cursor, font, img_entree, img_anti):
     cr = grid_rect(*cursor)
     pg.draw.rect(screen, CURSOR, cr, width=2, border_radius=10)
 
+""" Divulguer le nom de la chambre en fonction de ou se trouve mon curseur"""
 def current_room_name(cursor, rooms):
     r, c = cursor
     if (r, c) == ENTRY_POS: return "Chambre d'entée"
@@ -88,47 +102,41 @@ def current_room_name(cursor, rooms):
     if rooms[r][c] == 1:    return "Room"
     return "—"
 
-def draw_sidebar(screen, font, big, inventory, room_label):
-    # zone sidebar = droite
+""" Cette fonction nous permet de constituer notre inventaire, qui se trouve à droite de l'écran"""
+def draw_sidebar(screen, font, big, inventory, room_label, icons):
     x0 = BOARD_W
     screen.fill(BG1, pg.Rect(x0, 0, SIDEBAR_W, H))
 
     # Titre
-    title = big.render("Inventory:", True, TEXT_DARK)
-    screen.blit(title, (x0 + 24, 24))
+    screen.blit(big.render("Inventory:", True, TEXT_DARK), (x0 + 24, 24))
 
-    # Lignes inventaire (texte + emoji)
-    lines = [
-        (f"{inventory.get('gold',0)}", " 🕯"),
-        (f"{inventory.get('rations',0)}", " 🍞"),
-        (f"{inventory.get('gems',0)}", " 💎"),
-        (f"{inventory.get('keys',0)}", " 🔑"),
-        (f"{inventory.get('relics',0)}", " ⚙"),
-    ]
-    y = 24
-    for val, ico in lines:
-        y += 36
-        t = big.render(val, True, TEXT_DARK)
-        screen.blit(t, (x0 + SIDEBAR_W - 80, y))
-        t2 = big.render(ico, True, TEXT_DARK)
-        screen.blit(t2, (x0 + SIDEBAR_W - 48, y))
+    # colonnes alignées
+    label_x = x0 + 24 + INV_ICON + 12
+    value_x = x0 + SIDEBAR_W - 64
+    y = 70
 
-    # Espace
-    y += 48
-    label = big.render(room_label, True, TEXT_DARK)
-    screen.blit(big.render("", True, TEXT_DARK), (x0+24, y))  # noop
-    header = big.render(" ", True, TEXT_DARK)
+    rows = [("pas","Pas"), ("pièces","Pièces"), ("gems","Gems"),
+            ("clés","Clés"), ("dés","Dés")]
 
-    # Titre de la pièce
-    hdr = big.render(room_label, True, TEXT_DARK)
-    screen.blit(hdr, (x0 + 24, y + 12))
+    for key, label in rows:
+        ico = icons.get(key)
+        if ico: screen.blit(ico, (x0 + 24, y))
+        # libellé
+        screen.blit(font.render(label, True, TEXT_DARK), (label_x, y + 6))
+        # quantité
+        qty = str(inventory.get(key, 0))
+        screen.blit(big.render(qty, True, TEXT_DARK), (value_x, y + 2))
+        y += max(INV_ICON, 28) + 14
+
+    # Section pièce actuelle (une seule ligne)
+    y += 16
+    screen.blit(big.render(room_label, True, TEXT_DARK), (x0 + 24, y))
 
     # Aide
     helpy = H - 56
-    h1 = font.render("Clic: placer/retirer une pièce", True, MUTED)
-    h2 = font.render("Flèches/ZQSD: curseur  |  Échap: quitter", True, MUTED)
-    screen.blit(h1, (x0 + 24, helpy))
-    screen.blit(h2, (x0 + 24, helpy + 22))
+    screen.blit(font.render("Clic: placer/retirer une pièce", True, MUTED), (x0 + 24, helpy))
+    screen.blit(font.render("Flèches/ZQSD: curseur  |  Échap: quitter", True, MUTED), (x0 + 24, helpy + 22))
+
 
 def main():
     pg.init()
@@ -144,14 +152,40 @@ def main():
     rooms[ANTI_POS[0]][ANTI_POS[1]]   = 1
     cursor = [ENTRY_POS[0], ENTRY_POS[1]]
 
-    # Inventaire minimal démo
-    inventory = {"gold":70, "rations":0, "gems":2, "keys":0, "relics":0}
+    """ Inventaire initiale """
 
-    # Images
+    inventory = {"pas":70, "pièces":0, "gems":2, "clés":0, "dés":0}
+
+    """ Image de chaque chambre (wikipedia du jeu BluePrince) """
+    """ taille de l'icone de chaque chambre """
     icon = CELL - 8
+
+
+    """ chargement des chambres """
     img_entree = load_img("entree.png", icon) or load_img("entree.png.webp", icon)
     img_anti   = load_img("antichambre.png", icon) or load_img("antichambre.png.webp", icon)
 
+    """ chargement des icones """
+    img_entree = None
+    for nm in ("entree.png", "entree.png.webp"):
+        if os.path.exists(os.path.join(ASSETS, nm)):
+            img_entree = load_png(nm, icon); break
+
+    img_anti = None
+    for nm in ("antichambre.png", "antichambre.png.webp"):
+        if os.path.exists(os.path.join(ASSETS, nm)):
+            img_anti = load_png(nm, icon); break
+
+    # icônes inventaire (tous les fichiers dans assets/)
+    icons = {
+        "pas":    load_png("footstep.png",    INV_ICON)    if os.path.exists(os.path.join(ASSETS,"footstep.png"))    else None,
+        "pièces": load_png("money.png", INV_ICON)    if os.path.exists(os.path.join(ASSETS,"money.png")) else None,
+        "gems":   load_png("diamond.png",   INV_ICON)    if os.path.exists(os.path.join(ASSETS,"diamond.png"))   else None,
+        "clés":   load_png("key.png",   INV_ICON)    if os.path.exists(os.path.join(ASSETS,"key.png"))   else None,
+        "dés":    load_png("dice.png",    INV_ICON)    if os.path.exists(os.path.join(ASSETS,"dice.png"))    else None,
+    }
+
+    """ Deroulement de l'inteface en fonction dece que le joeur touche """
     running = True
     while running:
         for e in pg.event.get():
@@ -186,7 +220,7 @@ def main():
         # Dessin
         draw_board(screen, rooms, tuple(cursor), big, img_entree, img_anti)
         room_label = current_room_name(tuple(cursor), rooms)
-        draw_sidebar(screen, font, big, inventory, room_label)
+        draw_sidebar(screen, font, big, inventory, room_label,icons)
 
         pg.display.flip()
         clock.tick(FPS)
