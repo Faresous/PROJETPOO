@@ -1,5 +1,5 @@
 import random
-rng = random.Random(seed)          
+rng = random.Random()          
 
 ROWS = 9  # nb de lignes
 
