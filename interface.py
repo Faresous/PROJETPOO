@@ -33,11 +33,11 @@ BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
 
 
-def grid_rect(l, c, x0=0, y0=0):
+def grid_rect(r, c, x0=0, y0=0):
     """ Dimmensionnement du plateau du jeu 
 
     Args:
-        l (int): le nombre de lignes 
+        r (int): le nombre de lignes 
         c (int): le nombres de colonnes 
         x0 (int): l'origine du nomrbes de lignes 
         y0 (int): l'origine du nombres de colonnes 
@@ -46,7 +46,7 @@ def grid_rect(l, c, x0=0, y0=0):
         Renvoie une grille de taille CELL x CELL 
     """
     x = x0 + PAD + c * (CELL + GAP)
-    y = y0 + PAD + l * (CELL + GAP)
+    y = y0 + PAD + r * (CELL + GAP)
     return pg.Rect(x, y, CELL, CELL)
 
 
@@ -312,7 +312,7 @@ def main():
                         rooms[r][c] ^= 1
 
         # Dessin
-        draw_board(screen, rooms, tuple(cursor), big, img_entree, img_anti)
+        draw_board(screen, rooms, cursor, img_entree, img_anti)
         room_label = current_room_name(tuple(cursor), rooms)
         draw_sidebar(screen, font, big, inventory, room_label, icons)
 
