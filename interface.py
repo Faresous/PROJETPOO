@@ -32,13 +32,36 @@ ANTI_POS  = (0,         COLS // 2)  # haut milieu
 BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
 
-def grid_rect(r, c, x0=0, y0=0):
+
+def grid_rect(l, c, x0=0, y0=0):
+    """ Dimmensionnement du plateau du jeu 
+
+    Args:
+        l (int): le nombre de lignes 
+        c (int): le nombres de colonnes 
+        x0 (int): l'origine du nomrbes de lignes 
+        y0 (int): l'origine du nombres de colonnes 
+    
+    Returns:
+        Renvoie une grille de taille CELL x CELL 
+    """
     x = x0 + PAD + c * (CELL + GAP)
-    y = y0 + PAD + r * (CELL + GAP)
+    y = y0 + PAD + l * (CELL + GAP)
     return pg.Rect(x, y, CELL, CELL)
 
-""" Cette fonction nous divulgue notre position """
+
 def pos_from_mouse(mx, my, x0=0, y0=0):
+    """ Position actuel et Bords / limites du plateau de jeu
+
+    Args:
+        mx (int): Position du curseur en lignes 
+        my (int): Position du curseur en colonnes 
+        x0 (int): l'origine du nomrbes de lignes 
+        y0 (int): l'origine du nombres de colonnes 
+        
+    Returns:
+        Renvoie la position de la cellule actuel ou None si on est à l'exterieur  
+    """
     # clics seulement dans la zone plateau
     if mx >= BOARD_W: 
         return None
@@ -48,8 +71,16 @@ def pos_from_mouse(mx, my, x0=0, y0=0):
                 return (r, c)
     return None
 
-""" télécharger les icones de l'inventaire """
 def load_png(name, size):
+    """ Chargement des icons des objets 
+
+    Args:
+        name (str): Path de l'icon 
+        size (int): Taille de redimensionnement souhaitée
+        
+    Returns:
+        Renvoie l'image redimmensionnée et représentée en icon
+    """
     path = os.path.join(ASSETS, name)
     surf = pg.image.load(path).convert_alpha()
     return pg.transform.smoothscale(surf, (size, size))
@@ -62,11 +93,22 @@ def load_img(name, size):
         return pg.transform.smoothscale(surf, (size, size))
     except Exception:
         return None
-
     return None
 
-""" Cette fonction nous permet de constituer notre plateau de jeux, qui se trouve à gauche de l'écran"""
-def draw_board(screen, rooms, cursor, font, img_entree, img_anti):
+
+def draw_board(screen, rooms, cursor, img_entree, img_anti):
+    """ Construire le plateau de jeu à gauche de l'écran
+
+    Args:
+        screen (pygame.surface): Fond ert formes des grilles   
+        rooms (list(list(int))): Contient la list des pièces
+        cursor (tuple[int,int]): coordonnées du curseur 
+        img_entree(pygame.surface): L'image de la chambre d'entrée 
+        img_anti(pygame.surface): L'image de l'antichambre 
+        
+    Returns:
+        Retourne le plateau de jeu 
+    """
     # zone plateau = gauche
     screen.fill(BG2, pg.Rect(0, 0, BOARD_W, H))
 
@@ -95,16 +137,39 @@ def draw_board(screen, rooms, cursor, font, img_entree, img_anti):
     cr = grid_rect(*cursor)
     pg.draw.rect(screen, CURSOR, cr, width=2, border_radius=10)
 
-""" Divulguer le nom de la chambre en fonction de ou se trouve mon curseur"""
+
 def current_room_name(cursor, rooms):
+    """ Affichage du nom de la chambre actuel
+
+    Args:
+        rooms (list(list(int))): Contient la list des pièces
+        cursor (tuple[int,int]): coordonnées du curseur 
+        
+    Returns:
+        Renvoie une chaine de caractère avce le nom de la chambre 
+    """
     r, c = cursor
-    if (r, c) == ENTRY_POS: return "Chambre d'entée"
+    if (r, c) == ENTRY_POS: return "Chambre d'entrée"
     if (r, c) == ANTI_POS:  return "Anti-chambre"
     if rooms[r][c] == 1:    return "Room"
     return "—"
 
-""" Cette fonction nous permet de constituer notre inventaire, qui se trouve à droite de l'écran"""
+
 def draw_sidebar(screen, font, big, inventory, room_label, icons):
+    
+    """ Construire l'inventaire à droite de l'écran 
+
+    Args:
+        screen (pygame.surface): Fond ert formes des grilles  
+        font (pygame.font): La police d'écriture 
+        big (pygame.font): Agrandir la police pour les titres
+        inventory (dictionnary[str,str]): Dictionnaire contient l'inventaire du joueur 
+        room_label (str): Etiquete de la chambre 
+        icons (dictionnary[str,pygame.surface]): Icons et noms de chaque item 
+           
+    Returns:
+        Renvoie l'affichage de l'inventaire 
+    """
     x0 = BOARD_W
     screen.fill(BG1, pg.Rect(x0, 0, SIDEBAR_W, H))
 
@@ -155,6 +220,7 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     helpy = H - 56
     screen.blit(font.render("Clic: placer/retirer une pièce", True, MUTED), (x0 + 24, helpy))
     screen.blit(font.render("Flèches/ZQSD: curseur  |  Échap: quitter", True, MUTED), (x0 + 24, helpy + 22))
+
 
 
 """ main (test) """
