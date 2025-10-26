@@ -8,13 +8,14 @@ CELL, GAP, PAD = 64, 4, 40
 BOARD_W = COLS * (CELL + GAP) + PAD * 2 - GAP
 BOARD_H = ROWS * (CELL + GAP) + PAD * 2 - GAP
 
-SIDEBAR_W = 340
+SIDEBAR_W = 520  # élargissement inventaire
 W = BOARD_W + SIDEBAR_W
 H = BOARD_H + 72
 FPS = 60
 
 """ taille de l'icone de chaque item (inventaire) """
-INV_ICON = 32
+INV_ICON_PERM = 24      # icônes permanents
+INV_ICON_CONS = 20      # icônes consommables plus petites
 # Couleurs
 BG1        = (255, 255, 255)   # fond global blanc pour l'inventaire
 BG2        = (0, 0, 0)         # fond noir pour le plateau de jeux
@@ -36,6 +37,7 @@ def grid_rect(r, c, x0=0, y0=0):
     y = y0 + PAD + r * (CELL + GAP)
     return pg.Rect(x, y, CELL, CELL)
 
+""" Cette fonction nous divulgue notre position """
 def pos_from_mouse(mx, my, x0=0, y0=0):
     # clics seulement dans la zone plateau
     if mx >= BOARD_W: 
@@ -47,7 +49,6 @@ def pos_from_mouse(mx, my, x0=0, y0=0):
     return None
 
 """ télécharger les icones de l'inventaire """
-
 def load_png(name, size):
     path = os.path.join(ASSETS, name)
     surf = pg.image.load(path).convert_alpha()
@@ -110,27 +111,45 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     # Titre
     screen.blit(big.render("Inventory:", True, TEXT_DARK), (x0 + 24, 24))
 
-    # colonnes alignées
-    label_x = x0 + 24 + INV_ICON + 12
-    value_x = x0 + SIDEBAR_W - 64
-    y = 70
+    # Deux colonnes: permanents à gauche, consommables à droite
+    colL_x = x0 + 24
+    colR_x = x0 + SIDEBAR_W // 2 + 20
+    name_dx_L = INV_ICON_PERM + 10
+    name_dx_R = INV_ICON_CONS + 10
+    val_dx  = 120
 
-    rows = [("pas","Pas"), ("pièces","Pièces"), ("gems","Gems"),
-            ("clés","Clés"), ("dés","Dés")]
+    # En-têtes colonnes
+    screen.blit(font.render("Permanents", True, MUTED),   (colL_x, 56))
+    screen.blit(font.render("Consommables", True, MUTED), (colR_x, 56))
 
-    for key, label in rows:
+    # Définition des groupes
+    permanents   = [("pelle","Pelle"), ("detecteur","Détecteur"), ("patte","Patte de lapin"), ("carte","Carte")]
+    consommables = [("pas","Pas"), ("pièces","Pièces"), ("gems","Gems"), ("clés","Clés"), ("dés","Dés")]
+
+    # Colonne gauche: permanents (afficher seulement si obtenus)
+    yL = 80
+    for key, label in permanents:
+        qty = inventory.get(key, 0)
+        if qty > 0:  # afficher seulement si possédé
+            ico = icons.get(key)
+            if ico: screen.blit(ico, (colL_x, yL))
+            screen.blit(font.render(label, True, TEXT_DARK), (colL_x + name_dx_L, yL + 6))
+            screen.blit(big.render(str(qty), True, TEXT_DARK), (colL_x + val_dx, yL + 2))
+            yL += max(INV_ICON_PERM, 28) + 14
+
+    # Colonne droite: consommables (toujours visibles, icônes plus petites)
+    yR = 80
+    for key, label in consommables:
+        qty = inventory.get(key, 0)
         ico = icons.get(key)
-        if ico: screen.blit(ico, (x0 + 24, y))
-        # libellé
-        screen.blit(font.render(label, True, TEXT_DARK), (label_x, y + 6))
-        # quantité
-        qty = str(inventory.get(key, 0))
-        screen.blit(big.render(qty, True, TEXT_DARK), (value_x, y + 2))
-        y += max(INV_ICON, 28) + 14
+        if ico: screen.blit(pg.transform.smoothscale(ico, (INV_ICON_CONS, INV_ICON_CONS)), (colR_x, yR + 4))
+        screen.blit(font.render(label, True, TEXT_DARK), (colR_x + name_dx_R, yR + 6))
+        screen.blit(big.render(str(qty), True, TEXT_DARK), (colR_x + val_dx, yR + 2))
+        yR += max(INV_ICON_CONS, 28) + 14
 
     # Section pièce actuelle (une seule ligne)
-    y += 16
-    screen.blit(big.render(room_label, True, TEXT_DARK), (x0 + 24, y))
+    y_bottom = max(yL, yR) + 12
+    screen.blit(big.render(room_label, True, TEXT_DARK), (x0 + 24, y_bottom))
 
     # Aide
     helpy = H - 56
@@ -138,6 +157,7 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     screen.blit(font.render("Flèches/ZQSD: curseur  |  Échap: quitter", True, MUTED), (x0 + 24, helpy + 22))
 
 
+""" main (test) """
 def main():
     pg.init()
     screen = pg.display.set_mode((W, H))
@@ -153,39 +173,47 @@ def main():
     cursor = [ENTRY_POS[0], ENTRY_POS[1]]
 
     """ Inventaire initiale """
-
-    inventory = {"pas":70, "pièces":0, "gems":2, "clés":0, "dés":0}
+    inventory = {
+        # permanents
+        "pelle":0, "detecteur":0, "patte":0, "carte":0,
+        # consommables
+        "pas":70, "pièces":0, "gems":2, "clés":0, "dés":0
+    }
 
     """ Image de chaque chambre (wikipedia du jeu BluePrince) """
     """ taille de l'icone de chaque chambre """
     icon = CELL - 8
 
-
     """ chargement des chambres """
-    img_entree = load_img("entree.png", icon) or load_img("entree.png.webp", icon)
-    img_anti   = load_img("antichambre.png", icon) or load_img("antichambre.png.webp", icon)
-
-    """ chargement des icones """
     img_entree = None
     for nm in ("entree.png", "entree.png.webp"):
         if os.path.exists(os.path.join(ASSETS, nm)):
             img_entree = load_png(nm, icon); break
-
     img_anti = None
     for nm in ("antichambre.png", "antichambre.png.webp"):
         if os.path.exists(os.path.join(ASSETS, nm)):
             img_anti = load_png(nm, icon); break
 
-    # icônes inventaire (tous les fichiers dans assets/)
+    """ chargement des icones """
+    def opt(name): 
+        p = os.path.join(ASSETS, name)
+        return load_png(name, INV_ICON_PERM) if os.path.exists(p) else None
+
     icons = {
-        "pas":    load_png("footstep.png",    INV_ICON)    if os.path.exists(os.path.join(ASSETS,"footstep.png"))    else None,
-        "pièces": load_png("money.png", INV_ICON)    if os.path.exists(os.path.join(ASSETS,"money.png")) else None,
-        "gems":   load_png("diamond.png",   INV_ICON)    if os.path.exists(os.path.join(ASSETS,"diamond.png"))   else None,
-        "clés":   load_png("key.png",   INV_ICON)    if os.path.exists(os.path.join(ASSETS,"key.png"))   else None,
-        "dés":    load_png("dice.png",    INV_ICON)    if os.path.exists(os.path.join(ASSETS,"dice.png"))    else None,
+        # permanents
+        "pelle": opt("shovel.png"),
+        "detecteur": opt("metal_detector.png"),
+        "patte": opt("rabbit_foot.png"),
+        "carte": opt("map.png"),
+        # consommables
+        "pas": opt("footstep.png"),
+        "pièces": opt("money.png"),
+        "gems": opt("diamond.png"),
+        "clés": opt("key.png"),
+        "dés": opt("dice.png"),
     }
 
-    """ Deroulement de l'inteface en fonction dece que le joeur touche """
+    """ Deroulement de l'inteface en fonction des touches enfoncer par le joueur sur son clavier """
     running = True
     while running:
         for e in pg.event.get():
@@ -220,7 +248,7 @@ def main():
         # Dessin
         draw_board(screen, rooms, tuple(cursor), big, img_entree, img_anti)
         room_label = current_room_name(tuple(cursor), rooms)
-        draw_sidebar(screen, font, big, inventory, room_label,icons)
+        draw_sidebar(screen, font, big, inventory, room_label, icons)
 
         pg.display.flip()
         clock.tick(FPS)
