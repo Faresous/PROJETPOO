@@ -1,8 +1,8 @@
-# interface_blueprince_sidebar.py
+# interface_blueprince
 import os, sys
 import pygame as pg
 
-# --- Grille Blue Prince
+""" Grille Blue Prince """
 ROWS, COLS = 9, 5
 CELL, GAP, PAD = 64, 4, 40
 BOARD_W = COLS * (CELL + GAP) + PAD * 2 - GAP
