@@ -14,8 +14,7 @@ H = BOARD_H + 72
 FPS = 60
 
 """ taille de l'icone de chaque item (inventaire) """
-INV_ICON_PERM = 24      # icônes permanents
-INV_ICON_CONS = 20      # icônes consommables plus petites
+INV_ICON = 24      # icônes objets permanents/consommables
 # Couleurs
 BG1        = (255, 255, 255)   # fond global blanc pour l'inventaire
 BG2        = (0, 0, 0)         # fond noir pour le plateau de jeux
@@ -150,7 +149,7 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     """ Construire l'inventaire à droite de l'écran 
 
     Args:
-        screen (pygame.surface): Fond ert formes des grilles  
+        screen (pygame.surface): Fond et formes des grilles  
         font (pygame.font): La police d'écriture 
         big (pygame.font): Agrandir la police pour les titres
         inventory (dictionnary[str,str]): Dictionnaire contient l'inventaire du joueur 
@@ -169,8 +168,8 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     # Deux colonnes: permanents à gauche, consommables à droite
     colL_x = x0 + 24
     colR_x = x0 + SIDEBAR_W // 2 + 20
-    name_dx_L = INV_ICON_PERM + 10
-    name_dx_R = INV_ICON_CONS + 10
+    name_dx_L = INV_ICON + 10
+    name_dx_R = INV_ICON + 10
     val_dx  = 120
 
     # En-têtes colonnes
@@ -197,10 +196,10 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     for key, label in consommables:
         qty = inventory.get(key, 0)
         ico = icons.get(key)
-        if ico: screen.blit(pg.transform.smoothscale(ico, (INV_ICON_CONS, INV_ICON_CONS)), (colR_x, yR + 4))
+        if ico: screen.blit(pg.transform.smoothscale(ico, (INV_ICON, INV_ICON)), (colR_x, yR + 4))
         screen.blit(font.render(label, True, TEXT_DARK), (colR_x + name_dx_R, yR + 6))
         screen.blit(big.render(str(qty), True, TEXT_DARK), (colR_x + val_dx, yR + 2))
-        yR += max(INV_ICON_CONS, 28) + 14
+        yR += max(INV_ICON, 28) + 14
 
     # Section pièce actuelle (une seule ligne)
     y_bottom = max(yL, yR) + 12
@@ -211,6 +210,20 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     screen.blit(font.render("Clic: placer/retirer une pièce", True, MUTED), (x0 + 24, helpy))
     screen.blit(font.render("Flèches/ZQSD: curseur  |  Échap: quitter", True, MUTED), (x0 + 24, helpy + 22))
 
+
+def opt_obj(name): 
+
+    """ Générer l'icône pour chaque objet, qu'il soit permanent ou temporaire 
+
+    Args:
+    name (str) : le nom du fichier de l'objet (example: "shovel.png")
+        
+    Returns:
+    Renvoie un objet image (pygame.Surface) redimmensionné ou None si l'objet n'existe pas.
+    """
+
+    p = os.path.join(ASSETS, name)
+    return load_png(name, INV_ICON) if os.path.exists(p) else None
 
 
 """ main (test) """
@@ -236,40 +249,47 @@ def main():
         "pas":70, "pièces":0, "gems":2, "clés":0, "dés":0
     }
 
-    """ Image de chaque chambre (wikipedia du jeu BluePrince) """
-    """ taille de l'icone de chaque chambre """
+    """ Icone de chaque chambre/objet (wikipedia du jeu BluePrince) """
+    # taille de l'icone des chambres
     icon = CELL - 8
 
-    """ chargement des chambres """
-    img_entree = None
-    for nm in ("entree.png", "entree.png.webp"):
-        if os.path.exists(os.path.join(ASSETS, nm)):
-            img_entree = load_png(nm, icon); break
-    img_anti = None
-    for nm in ("antichambre.png", "antichambre.png.webp"):
-        if os.path.exists(os.path.join(ASSETS, nm)):
-            img_anti = load_png(nm, icon); break
+    """ 
+        Chargement des icones pour les chambres
+        
+     """
 
-    """ chargement des icones """
-    def opt(name): 
-        p = os.path.join(ASSETS, name)
-        return load_png(name, INV_ICON_PERM) if os.path.exists(p) else None
+    # pour l'instant on a que la chambre d'entrée et l'anti-chambre donc apres il faudra implementer
+    # une fonction pour généraliser toutes les chambres
+
+    img_entree = None
+    if os.path.exists(os.path.join(ASSETS)):
+        img_entree = load_png("entree.webp", icon)
+
+    img_anti = None
+    if os.path.exists(os.path.join(ASSETS)):
+        img_anti = load_png("antichambre.webp", icon)
+
 
     icons = {
         # permanents
-        "pelle": opt("shovel.png"),
-        "detecteur": opt("metal_detector.png"),
-        "patte": opt("rabbit_foot.png"),
-        "carte": opt("map.png"),
+        "pelle": opt_obj("shovel.png"),
+        "detecteur de méteaux": opt_obj("metal-detector.png"),
+        "patte de lapin": opt_obj("rabbit_foot.png"),
+        "kit de crochetage": opt_obj("lockpick.png"),
+        "marteau": opt_obj("hammer.png"),
+
         # consommables
-        "pas": opt("footstep.png"),
-        "pièces": opt("money.png"),
-        "gems": opt("diamond.png"),
-        "clés": opt("key.png"),
-        "dés": opt("dice.png"),
+        "pas": opt_obj("footstep.png"),
+        "pièces": opt_obj("money.png"),
+        "gems": opt_obj("diamond.png"),
+        "clés": opt_obj("key.png"),
+        "dés": opt_obj("dice.png"),
     }
 
-    """ Deroulement de l'inteface en fonction des touches enfoncer par le joueur sur son clavier """
+    """
+     Deroulement de l'inteface en fonction des touches enfoncer par le joueur sur son clavier
+     
+      """
     running = True
     while running:
         for e in pg.event.get():
@@ -301,12 +321,11 @@ def main():
                     if (r, c) not in (ENTRY_POS, ANTI_POS):
                         rooms[r][c] ^= 1
 
-        # Dessin
-<<<<<<< HEAD
-        draw_board(screen, rooms, cursor, img_entree, img_anti)
-=======
+        """
+            Appel des fonctions pour dessiner le plateau de jeu et l'inventaire
+
+            """
         draw_board(screen, rooms, tuple(cursor), cursor, img_entree, img_anti)
->>>>>>> 97cefceedf6b7a4308079d513a2e069677ea9d25
         room_label = current_room_name(tuple(cursor), rooms)
         draw_sidebar(screen, font, big, inventory, room_label, icons)
 
