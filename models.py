@@ -24,13 +24,3 @@ def resumer(self):
         "portes": dict(self.portes),  #copie l'etat des portes 
         "objets": len(self.objets_dans_la_piece)  #le nombre d'objet présents 
     }
-def generer_portes(self, ligne):
-    #generer automatiquement les portes de la pieces en fonction de la ligne 
-    self.portes={
-         "nord": doors.door_level_by_row(ligne),  #calcule l'etat de la porte nord selon la ligne 
-         "sud": doors.door_level_by_row(ligne),
-         "est": doors.door_level_by_row(ligne),
-         "ouest": doors.door_level_by_row(ligne),
-
-    }
-
