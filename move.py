@@ -5,6 +5,9 @@ def move (self, dep_ligne, dep_colonne) :
         dep_ligne (int): Déplacement du joueur suivant les lignes 
         dep_colonne (int): Déplacement du joueur suivant les colonnes 
     """
-    self.pas -= 1 
-    self.ligne += dep_ligne
-    self.colonne += dep_colonne
+    if self.pas > 0:
+        self.pas -= 1 
+        self.ligne += dep_ligne
+        self.colonne += dep_colonne
+        return True
+    return False 
