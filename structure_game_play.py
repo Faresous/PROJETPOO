@@ -60,6 +60,7 @@ class joueur:
         self.ligne=ligne_depart
         self.colonne=colonne_depart
         #consomable
+<<<<<<< HEAD
         self.pas=70
         self.orr=0
         self.gemmes=2
@@ -68,5 +69,27 @@ class joueur:
         #objets permanants que le joueur trouvera 
         self.objet_permanents=[]
 
+=======
+        self.pas = 70
+        self.orr = 0
+        self.gemmes = 2
+        self.cles = 0
+        self.des = 0
+        #objets permanants que le joueur trouvera 
+        self.objet_permanents=[]
+
+    def move (self, dep_ligne, dep_colonne) :
+        """ Déplacement du joueur sur la grille
+        Args:
+            dep_ligne (int): Déplacement du joueur suivant les lignes 
+            dep_colonne (int): Déplacement du joueur suivant les colonnes 
+        """
+        if self.pas > 0:
+            self.pas -= 1 
+            self.ligne += dep_ligne
+            self.colonne += dep_colonne
+            return True
+        return False 
+>>>>>>> 6db5ac0373ca66a3abf67a14031f5b85e497af9a
 
        

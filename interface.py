@@ -15,6 +15,7 @@ FPS = 60
 
 """ taille de l'icone de chaque item (inventaire) """
 INV_ICON = 24      # icônes objets permanents/consommables
+
 # Couleurs
 BG1        = (255, 255, 255)   # fond global blanc pour l'inventaire
 BG2        = (0, 0, 0)         # fond noir pour le plateau de jeux
