@@ -24,3 +24,4 @@ def resumer(self):
         "portes": dict(self.portes),  #copie l'etat des portes 
         "objets": len(self.objets_dans_la_piece)  #le nombre d'objet présents 
     }
+    
