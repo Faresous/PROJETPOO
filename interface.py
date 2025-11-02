@@ -32,6 +32,16 @@ ANTI_POS  = (0,         COLS // 2)  # haut milieu
 BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
 
+def init_music():
+    """ Music de fond du jeu BluePrince 
+     
+    Returns:
+        Renvoie la musique de fond initialisée et jouée en boucle  
+    """
+    pg.mixer.init()
+    pg.mixer.music.load(os.path.join(ASSETS, "blueprince.mp3"))
+    pg.mixer.music.set_volume(1)
+    pg.mixer.music.play(-1)
 
 def grid_rect(r, c, x0=0, y0=0):
     """ Dimmensionnement du plateau du jeu 
@@ -230,6 +240,7 @@ def opt_obj(name):
 """ main (test) """
 def main():
     pg.init()
+    init_music()
     screen = pg.display.set_mode((W, H))
     pg.display.set_caption("Blue Prince — Jeux + Inventaire")
     clock = pg.time.Clock()
