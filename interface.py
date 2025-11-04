@@ -1,6 +1,7 @@
 # interface_blueprince
 import os, sys
 import pygame as pg
+from enum import Enum
 
 """ Grille Blue Prince """
 ROWS, COLS = 9, 5
@@ -31,6 +32,244 @@ ANTI_POS  = (0,         COLS // 2)  # haut milieu
 """ Icon de chaque chambre ou objet """
 BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
+
+# classe fille de Enum (heritage)
+class UIState(Enum):
+    """
+    Énumération représentant les différents états de l'interface utilisateur du jeu BluePrince.
+
+    Chaque valeur indique dans quelle phase ou écran se trouve actuellement le joueur :
+    - MENU : affichage du menu principal (écran d'accueil).
+    - PLAYING : jeu en cours (plateau et inventaire affichés).
+    - OPTIONS : écran des paramètres (audio, commandes, etc.).
+    - QUITTING : fermeture du jeu ou retour au bureau.
+
+    Cette classe permet de gérer simplement la logique de navigation entre les différents écrans
+    du jeu sans recourir à des variables booléennes multiples.
+    """
+    MENU     = 0
+    PLAYING  = 1
+    OPTIONS  = 2
+    QUITTING = 3
+
+# couleur pour le menu principal
+WHITE = (255, 255, 255)
+ACCENT = (28, 160, 110)
+ACCENT_DARK = (20, 120, 85)
+
+def _button_rects(center_x, start_y, w = 360, h = 56, gap = 16):
+    """ Création des boutons du menu principal en forme de rectangle  
+
+    Args:
+        center_x (int): coordonnée du centre du rectangle par rapport à x 
+        start_y (int): hauteur du rectangle de chaque bouton (sa coordonnée y) 
+        w (int): la largeur du rectangle 
+        h (int): la hauteur du rectangle
+        gap (int): l'espace entre chaque bouton
+
+    Returns:
+        Renvoie une liste qui crée le rectangle correspondant à chaque bouton 
+    """
+    rects = []
+    y = start_y
+    for _ in range(4):
+        rects.append(pg.Rect(center_x - w//2, y, w, h))
+        y += h + gap
+    return rects
+
+def draw_main_menu(screen,
+                   big,
+                   font,
+                   bg_img: pg.Surface | None,
+                   focus_idx: int) -> list[pg.Rect]:
+
+    """ Dessine le menu principal avec les boutons  
+
+    Args:
+        screen (pg.Surface): écran de jeu
+        big (pg.font.Font): agrandir la police pour les titres 
+        font (pg.font.Font): la police d'écriture  
+        bg_img (pg.Surface): écran de fond
+        focus_idx (int): index du bouton de la position actuelle
+
+    Returns:
+        Renvoie l'affichage du menu principal avec une liste de rectangles correspondant à chaque bouton 
+    """
+    screen.fill(BG1)
+    if bg_img:
+        bg = pg.transform.smoothscale(bg_img, (screen.get_width(), screen.get_height()))
+        screen.blit(bg, (0, 0))
+        dark = pg.Surface(screen.get_size(), pg.SRCALPHA)
+        dark.fill((0, 0, 0, 70))  # léger assombrissement
+        screen.blit(dark, (0, 0))
+
+    cx = screen.get_width() // 2
+    title = big.render("BluePrince", True, TEXT_DARK)
+    subtitle = font.render("Choisissez une action", True, MUTED)
+    screen.blit(title, title.get_rect(center=(cx, 140)))
+    screen.blit(subtitle, subtitle.get_rect(center=(cx, 190)))
+
+    rects = _button_rects(center_x=cx, start_y=260)
+    labels = ["Nouvelle partie", "Charger", "Options", "Quitter"]
+
+    mx, my = pg.mouse.get_pos()
+    for i, (r, label) in enumerate(zip(rects, labels)):
+        hovered = r.collidepoint(mx, my) or (i == focus_idx)
+        draw_pill_button(screen, r, hovered)
+        txt = font.render(label, True, ACCENT_DARK if hovered else TEXT_DARK)
+        screen.blit(txt, txt.get_rect(center=r.center))
+    return rects
+
+def draw_pill_button(screen, rect, hovered):
+    """
+    Dessine un bouton de type "bulle" (bordure arrondie).
+
+    Args:
+        screen (pg.Surface): Surface principale sur laquelle le bouton est affiché.
+        rect (pg.Rect): Rectangle définissant la position et la taille du bouton.
+        hovered (bool): Indique si le bouton est survolé par la souris (active un effet visuel plus lumineux au niveau des bordures).
+
+    Returns:
+        Dessine directement sur la surface du bouton donnée.
+    """
+    # ombre
+    sh = pg.Surface((rect.w, rect.h), pg.SRCALPHA)
+    pg.draw.rect(sh, (0, 0, 0, 60), (0, 0, rect.w, rect.h), border_radius=rect.h // 2)
+    screen.blit(sh, (rect.x, rect.y + 4))
+    # capsule semi-transparente
+    btn = pg.Surface((rect.w, rect.h), pg.SRCALPHA)
+    pg.draw.rect(btn, (255, 255, 255, 240 if hovered else 220),
+                 (0, 0, rect.w, rect.h), border_radius=rect.h // 2)
+    # bord
+    pg.draw.rect(btn, ACCENT if hovered else (220, 226, 231),
+                 (0, 0, rect.w, rect.h), width=2, border_radius=rect.h // 2)
+    screen.blit(btn, rect.topleft)
+
+
+def run_main_menu(screen, 
+                big,
+                font,
+                clock, 
+                assets_dir):
+    """
+    Affiche et gère le menu principal du jeu.
+
+    Cette fonction crée la boucle d'événements du menu d'accueil. 
+    Elle affiche le fond, les boutons (Nouvelle partie, Charger, Options, Quitter),
+    et gère la navigation via le clavier et la souris. 
+    Lorsqu'une option est sélectionnée, elle renvoie l'état correspondant du jeu.
+
+    Args:
+        screen (pg.Surface): Surface principale de la fenêtre Pygame où le menu est affiché.
+        big (pg.font.Font): Agrandir la police pour les titres.
+        font (pg.font.Font): Police d'écriture de text.
+        clock (pg.time.Clock): Horloge Pygame utilisée pour limiter la fréquence d'affichage (FPS).
+        assets_dir (str): Chemin vers le dossier contenant les images a implementé.
+
+    Returns:
+        UIState: L'état sélectionné par le joueur :
+            - UIState.PLAYING  → lancer une nouvelle partie
+            - UIState.OPTIONS  → ouvrir le menu des options
+            - UIState.QUITTING → quitter le jeu
+            - UIState.MENU     → (valeur temporaire pour "Charger", non encore implémenté)
+    """
+
+    bg_img = None
+    for nm in ("BG_blueprince.webp", "BG_blueprince.png", "BG_blueprince.jpg"):
+        p = os.path.join(assets_dir, nm)
+        if os.path.exists(p):
+            bg_img = pg.image.load(p).convert()
+            break
+
+    labels = ["Nouvelle partie", "Charger", "Options", "Quitter"]
+    actions = [UIState.PLAYING, "LOAD", UIState.OPTIONS, UIState.QUITTING]
+    focus_idx = 0
+
+    while True:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return UIState.QUITTING
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    return UIState.QUITTING
+                elif event.key in (pg.K_UP, pg.K_z):
+                    focus_idx = (focus_idx - 1) % len(labels)
+                elif event.key in (pg.K_DOWN, pg.K_s):
+                    focus_idx = (focus_idx + 1) % len(labels)
+                elif event.key in (pg.K_RETURN, pg.K_SPACE):
+                    act = actions[focus_idx]
+                    return act if isinstance(act, UIState) else UIState.MENU  # "LOAD" à brancher
+            if event.type == pg.MOUSEMOTION:
+                # survol souris met à jour le focus
+                rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
+                for i, r in enumerate(rects):
+                    if r.collidepoint(event.pos):
+                        focus_idx = i
+                        break
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
+                for i, r in enumerate(rects):
+                    if r.collidepoint(event.pos):
+                        act = actions[i]
+                        return act if isinstance(act, UIState) else UIState.MENU
+
+        draw_main_menu(screen, big, font, bg_img, focus_idx)
+        pg.display.flip()
+        clock.tick(FPS)
+
+def _run_options(screen: pg.Surface, font: pg.font.Font, big: pg.font.Font, clock: pg.time.Clock):
+    """
+    Affiche et gère la section "options" (3ème bouton dans le menu principal).
+
+    Args:
+        screen (pg.Surface): Surface principale de la fenêtre Pygame où le menu est affiché.
+        big (pg.font.Font): Police utilisée pour les titres du menu.
+        font (pg.font.Font): Police utilisée pour le texte des boutons.
+        clock (pg.time.Clock): Horloge Pygame utilisée pour limiter la fréquence d'affichage (FPS).
+        assets_dir (str): Chemin vers le dossier contenant les ressources graphiques du menu (fonds, images, etc.).
+
+    Returns:
+        UIState: L'état sélectionné par le joueur :
+            - UIState.PLAYING  → lancer une nouvelle partie
+            - UIState.OPTIONS  → ouvrir le menu des options
+            - UIState.QUITTING → quitter le jeu
+            - UIState.MENU     → (valeur temporaire pour "Charger", non encore implémenté)
+    """
+    running = True
+    while running:
+        for e in pg.event.get():
+            if e.type == pg.QUIT:
+                running = False
+            if e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
+                running = False
+            if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
+                running = False
+        screen.fill((240, 244, 248))
+        screen.blit(big.render("Options", True, TEXT_DARK), (40, 40))
+        screen.blit(font.render("Je pense à implementer la langue, peut-être une jauge d'audio, luminosité...", True, MUTED), (40, 110))
+        pg.display.flip()
+        clock.tick(FPS)
+
+def _start_new_game(inventory, rooms, cursor):
+    """
+    Initialise une nouvelle partie en réinitialisant l'inventaire, la grille des chambres et le curseur 
+
+    Args:
+        inventory (dict): dictionnaire contenant l'inventaire initial du joueur (nom + quantité) 
+        rooms (list[list[int]]): grille des chambres (0 = vide, 1 = chambre présente) 
+        cursor (list[int]): position actuelle  
+    
+    Returns:
+        Renvoie l'état initialisé de l'inventaire, les chambres et la position actuelle pour une nouvelle partie 
+    """
+    for r in range(ROWS):
+        for c in range(COLS):
+            rooms[r][c] = 0
+    rooms[ENTRY_POS[0]][ENTRY_POS[1]] = 1
+    rooms[ANTI_POS[0]][ANTI_POS[1]]   = 1
+    cursor[0], cursor[1] = ENTRY_POS
+    inventory.update({"pelle":0, "detecteur":0, "patte":0, "carte":0, "pas":70, "pièces":0, "gems":2, "clés":0, "dés":0})
+
 
 def init_music():
     """ Music de fond du jeu BluePrince 
@@ -162,7 +401,7 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     Args:
         screen (pygame.surface): Fond et formes des grilles  
         font (pygame.font): La police d'écriture 
-        big (pygame.font): Agrandir la police pour les titres
+        big (pygame.font.Font): Agrandir la police pour les titres
         inventory (dictionnary[str,str]): Dictionnaire contient l'inventaire du joueur 
         room_label (str): Etiquete de la chambre 
         icons (dictionnary[str,pygame.surface]): Icons et noms de chaque item 
@@ -188,7 +427,7 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
     screen.blit(font.render("Consommables", True, MUTED), (colR_x, 56))
 
     # Définition des groupes
-    permanents   = [("pelle","Pelle"), ("detecteur","Détecteur"), ("patte","Patte de lapin"), ("carte","Carte")]
+    permanents   = [("pelle","Pelle"), ("detecteur de méteaux","Détecteur"), ("patte de lapin","Patte de lapin"), ("kit de crochetage","KC"),("marteau","Marteau")]
     consommables = [("pas","Pas"), ("pièces","Pièces"), ("gems","Gems"), ("clés","Clés"), ("dés","Dés")]
 
     # Colonne gauche: permanents (afficher seulement si obtenus)
@@ -200,7 +439,7 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
             if ico: screen.blit(ico, (colL_x, yL))
             screen.blit(font.render(label, True, TEXT_DARK), (colL_x + name_dx_L, yL + 6))
             screen.blit(big.render(str(qty), True, TEXT_DARK), (colL_x + val_dx, yL + 2))
-            yL += max(INV_ICON_PERM, 28) + 14
+            yL += max(INV_ICON, 28) + 14
 
     # Colonne droite: consommables (toujours visibles, icônes plus petites)
     yR = 80
@@ -239,6 +478,7 @@ def opt_obj(name):
 
 """ main (test) """
 def main():
+    state = UIState.MENU
     pg.init()
     init_music()
     screen = pg.display.set_mode((W, H))
@@ -302,47 +542,61 @@ def main():
      Deroulement de l'inteface en fonction des touches enfoncer par le joueur sur son clavier
      
       """
+     # --- boucle principale pilotée par l'état
     running = True
     while running:
-        for e in pg.event.get():
-            if e.type == pg.QUIT:
-                running = False
-            elif e.type == pg.KEYDOWN:
-                if e.key == pg.K_ESCAPE:
-                    running = False
-                elif e.key in (pg.K_UP, pg.K_z):
-                    cursor[0] = max(0, cursor[0] - 1)
-                elif e.key in (pg.K_DOWN, pg.K_s):
-                    cursor[0] = min(ROWS - 1, cursor[0] + 1)
-                elif e.key in (pg.K_LEFT, pg.K_q):
-                    cursor[1] = max(0, cursor[1] - 1)
-                elif e.key in (pg.K_RIGHT, pg.K_d):
-                    cursor[1] = min(COLS - 1, cursor[1] + 1)
-                elif e.key in (pg.K_RETURN, pg.K_SPACE):
-                    r, c = cursor
-                    if (r, c) not in (ENTRY_POS, ANTI_POS):
-                        rooms[r][c] = 1
-                elif e.key in (pg.K_DELETE, pg.K_BACKSPACE):
-                    r, c = cursor
-                    if (r, c) not in (ENTRY_POS, ANTI_POS):
-                        rooms[r][c] = 0
-            elif e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
-                hit = pos_from_mouse(*e.pos)
-                if hit:
-                    r, c = hit
-                    if (r, c) not in (ENTRY_POS, ANTI_POS):
-                        rooms[r][c] ^= 1
+        if state == UIState.MENU:
+            choice = run_main_menu(screen, big, font, clock, ASSETS)
+            if choice == UIState.QUITTING:
+                break
+            if choice == UIState.OPTIONS:
+                _run_options(screen, font, big, clock)
+                state = UIState.MENU
+                continue
+            if choice == UIState.PLAYING:
+                _start_new_game(inventory, rooms, cursor)
+                state = UIState.PLAYING
+                continue
 
-        """
-            Appel des fonctions pour dessiner le plateau de jeu et l'inventaire
+        if state == UIState.PLAYING:
+            for e in pg.event.get():
+                if e.type == pg.QUIT:
+                    state = UIState.QUITTING
+                elif e.type == pg.KEYDOWN:
+                    if e.key == pg.K_ESCAPE:
+                        state = UIState.MENU
+                    elif e.key in (pg.K_UP, pg.K_z):
+                        cursor[0] = max(0, cursor[0] - 1)
+                    elif e.key in (pg.K_DOWN, pg.K_s):
+                        cursor[0] = min(ROWS - 1, cursor[0] + 1)
+                    elif e.key in (pg.K_LEFT, pg.K_q):
+                        cursor[1] = max(0, cursor[1] - 1)
+                    elif e.key in (pg.K_RIGHT, pg.K_d):
+                        cursor[1] = min(COLS - 1, cursor[1] + 1)
+                    elif e.key in (pg.K_RETURN, pg.K_SPACE):
+                        r, c = cursor
+                        if (r, c) not in (ENTRY_POS, ANTI_POS):
+                            rooms[r][c] = 1
+                    elif e.key in (pg.K_DELETE, pg.K_BACKSPACE):
+                        r, c = cursor
+                        if (r, c) not in (ENTRY_POS, ANTI_POS):
+                            rooms[r][c] = 0
+                elif e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
+                    hit = pos_from_mouse(*e.pos)
+                    if hit:
+                        r, c = hit
+                        if (r, c) not in (ENTRY_POS, ANTI_POS):
+                            rooms[r][c] ^= 1
 
-            """
-        draw_board(screen, rooms, tuple(cursor), cursor, img_entree, img_anti)
-        room_label = current_room_name(tuple(cursor), rooms)
-        draw_sidebar(screen, font, big, inventory, room_label, icons)
+            # Rendu jeu
+            draw_board(screen, rooms, font, tuple(cursor), img_entree, img_anti)
+            room_label = current_room_name(tuple(cursor), rooms)
+            draw_sidebar(screen, font, big, inventory, room_label, icons)
+            pg.display.flip()
+            clock.tick(FPS)
 
-        pg.display.flip()
-        clock.tick(FPS)
+        if state == UIState.QUITTING:
+            running = False
 
     pg.quit()
     return 0
