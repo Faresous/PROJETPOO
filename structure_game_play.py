@@ -60,16 +60,6 @@ class joueur:
         self.ligne=ligne_depart
         self.colonne=colonne_depart
         #consomable
-<<<<<<< HEAD
-        self.pas=70
-        self.orr=0
-        self.gemmes=2
-        self.cles=0
-        self.des=0
-        #objets permanants que le joueur trouvera 
-        self.objet_permanents=[]
-
-=======
         self.pas = 70
         self.orr = 0
         self.gemmes = 2
@@ -90,6 +80,50 @@ class joueur:
             self.colonne += dep_colonne
             return True
         return False 
->>>>>>> 6db5ac0373ca66a3abf67a14031f5b85e497af9a
+    
+    def utiliser_gems (self, nb_gems) :
+        """ Utiliser et dépenser des gems. Renvoie True si réussi
+        Args:
+            nb_gems : Nombre de gems à dépenser
+         Returns :
+            Retourne True si l'ajout a bien été fait False sinon 
+        """
+        
+        if self.gemmes >= nb_gems : 
+            self.gemmes -= nb_gems
+            return True
+        return False
+    
+    def add_item(self, item, quantite):
+        """ Ajoute un objet à l'inventaire du joueur
 
-       
+        Args:
+            item (str): Nom de l'attribut à ajouter
+            quantite(int): quantité à ajouter
+        Returns:
+            True si l'ajout a bien été fait, False sinon
+        """
+        
+        items = {'shovel', 'hammer', 'lockpick', 'metal_detector', 'rabbit_foot'}
+        
+        # Si la quatité est pas un entier ou si elle est négative : ERREUR !!
+        if not isinstance(quantite, int) or quantite < 0:
+            return False
+        
+        # Objets permanants
+        if item in items :
+            if item not in self.objet_permanents:
+                self.objet_permanents.append(item)
+                print(f"{item} a été ajouté aux objets permanents.")
+            else:
+                print(f"Vous possédez déjà {item}.")
+            return True
+        
+        # Objets consommables
+        # REMARQUE : 'item_name' doit être le nom exact de l'attribut (ex: "pas", "orr", "gemmes")
+        if hasattr(self, item):
+            if isinstance(getattr(self, item), int):
+                setattr(self, item, getattr(self, item) + quantite)
+                print(f"Le joueur a ramassé {quantite} {item} !")      
+                return True
+            return False
