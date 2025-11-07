@@ -153,3 +153,31 @@ def default_state_from_rarity(r: Rarity) -> DoorState:
         Rarity.EPIC: DoorState.DOUBLE_LOCKED,
 
     }[r]
+def shape_Orientations(shape: RoomShape)-> Tuple [Orientation, ...]:
+    """
+    Renvoie les orientations actives associées a une forme de salle 
+    Args: 
+        shape(RoomShape): type de salle (FOUR_WAY, T_SHAPE, L_SHAPE, STRAIGHT, DEAD_END, SPECIAL)
+    Returns:
+          Tuple[Orientation,..]: Tuple des orientations présentes
+           convention d'ordre : (N,E,S,O) quand applicable
+            pour special, renvoie un tuple vide 
+    Details:
+        - FOUR_WAY  → (N, E, S, O)
+        - T_SHAPE   → (N, E, O)    # T ouvert vers le nord par convention
+        - L_SHAPE   → (N, E)       # deux portes adjacentes
+        - STRAIGHT  → (N, S)       # deux portes opposées
+        - DEAD_END  → (S,)         # cul-de-sac orienté sud par convention
+        - SPECIAL   → ()           # cas irrégulier géré ailleurs
+        """
+    if shape == RoomShape.FOUR_WAY:
+        return (Orientation.N,Orientation.E,Orientation.S, Orientation.O)
+    if shape == RoomShape.T_SHAPE:
+        return (Orientation.N,Orientation.E, Orientation.O)
+    if shape == RoomShape.L_SHAPE:
+        return (Orientation.N,Orientation.E)
+    if shape == RoomShape.STRAIGHT:
+        return (Orientation.N,Orientation.S)
+    if shape == RoomShape.DEAD_END:
+        return (Orientation.S)
+    return tuple() #SPECIAL
