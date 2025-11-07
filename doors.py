@@ -2,6 +2,8 @@ import random
 from __future__ import annotations
 from enum import Enum, IntEnum, auto
 from typing import Tuple
+from dataclasses import dataclass
+from typing import Set
 rng = random.Random()          
 
 ROWS = 9  # nb de lignes
@@ -181,3 +183,38 @@ def shape_Orientations(shape: RoomShape)-> Tuple [Orientation, ...]:
     if shape == RoomShape.DEAD_END:
         return (Orientation.S)
     return tuple() #SPECIAL
+
+@dataclass
+class Door:
+    """Representation d'une porte et son etat de verrouillage 
+
+       Args:
+        rarity(Rarity) : Rareté de la porte 
+        state(DoorState): etat initial de la porte 
+       Returns:
+        Door: instance initialisée respectant l'invariant.
+       Invariant:
+        state->{UNLOCKED, LOCKED, DOUBLE_LOCKED}
+     """
+    rarity: Rarity
+    state: DoorState
+    def open(self, inventory: set[str])-> bool:
+        """ouvre la porte selon la cle disponible et met la porte unlocked apres
+            Args:
+            inventory set[str]: ensemble des clés détenues 
+            Returns:
+             bool: True si l'ouverture aboutit, false sinon """
+        if self.state == DoorState.UNLOCKED:
+            return True
+        if self.state == DoorState.LOCKED:
+            if "key" in inventory or f"key_{int(self.rarity)}" in inventory:
+                self.state = DoorState.UNLOCKED
+                return True
+            return False 
+        if self.state == DoorState.DOUBLE_LOCKED:
+            if "master_key" in inventory and f"key_{int(self.rarity)}" in inventory:
+                self.state = DoorState.UNLOCKED
+                return True
+            return False
+        return False
+    
