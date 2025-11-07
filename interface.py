@@ -252,15 +252,15 @@ def _run_options(screen: pg.Surface, font: pg.font.Font, big: pg.font.Font, cloc
 
 def _start_new_game(inventory, rooms, cursor):
     """
-    Initialise une nouvelle partie en réinitialisant l'inventaire, la grille des chambres et le curseur 
+    Initialise une nouvelle partie en réinitialisant l'inventaire, la grille des chambres et le curseur. 
 
     Args:
-        inventory (dict): dictionnaire contenant l'inventaire initial du joueur (nom + quantité) 
-        rooms (list[list[int]]): grille des chambres (0 = vide, 1 = chambre présente) 
-        cursor (list[int]): position actuelle  
+        inventory (dict): dictionnaire contenant l'inventaire initial du joueur (nom + quantité). 
+        rooms (list[list[int]]): grille des chambres (0 = vide, 1 = chambre présente). 
+        cursor (list[int]): position actuelle.  
     
     Returns:
-        Renvoie l'état initialisé de l'inventaire, les chambres et la position actuelle pour une nouvelle partie 
+        Renvoie l'état initialisé de l'inventaire, les chambres et la position actuelle pour une nouvelle partie. 
     """
     for r in range(ROWS):
         for c in range(COLS):
