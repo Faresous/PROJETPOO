@@ -88,3 +88,37 @@ def entrer(self,joueur):
     else:
         return False 
   
+class orientation(str, Enum):
+    """orientations cardinales utilisables par les portes 
+       Membres: 
+            N: Nord 
+            E: est
+            S: sud 
+            o: ouest
+            Remarque: concue pour une grille 2d en repere écran ou l'axe 
+            augments vers le bas """
+    N = "N"
+    E = "E"
+    S = "S"
+    O = "O"
+class Rarity(IntEnum):
+    """Rareter typeé des portes 
+    Niveaux: commmon (0): porte commune, occurance eleveé 
+              RARE(1): Porte rare, occurance moyenne
+              EPIC(2): Porte épique , occurance faible 
+              usage: échelle ordinale pour la génération, l'equilibrage et l'affichage
+              """
+    COMMON =0 
+    RARE = 1
+    EPIC = 2
+class DoorState(str, Enum):
+    """Etat possible d'une porte 
+       Membre :
+       UNLOCKED: Porte déverrouillée
+       LOCKED : verouiller 
+       DOUBLE_LOUCKED: Porte doublement verouilleé 
+       """
+    UNLOCKED = "UNLOCKED"
+    LOCKED = "LOCKED"
+    DOUBLE_LOCKED = "DOUBLE_LOCKED"
+
