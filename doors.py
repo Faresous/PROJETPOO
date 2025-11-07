@@ -54,3 +54,37 @@ def tirage_aléatoire_doors(row,rng=random):
      Je pense aussi qu'il faudra rajouter une fonction qui permet de résumer tous les caractéristiques de 
      chaque chambre, mais je pense que ce sera dans une autre classe qu'on nommera "Room" ou "Chambre". 
 """
+# classe pour les pieces du manoire 
+class piece:
+  #represnete une seule piece dans le manoire contient toute les caracteristique 
+  def __init__(self,nom,rarete,cout_gemmes,description,chemin_image):
+      #mes attribut
+      self.nom=nom
+      self.rarete=rarete     # un chiffre par exemple de 0 a 3 (3 tres rare )
+      self.cout_gemmes=cout_gemmes
+      self.description=description   # pour decrire l'effet spéciale de la piece 
+      self.chemin_image=chemin_image   # le lien vers l'image a afficher 
+    # une liste qui contiendra les objet trouver dans cette piece
+      self.objets_dans_la_piece=[]
+      #un dictionnaire pour les portes (nord: 0 et sud=1 par exemple ) 0=deverouiller 1= verouiller 2= double tour 
+      self.portes={}
+
+def resumer(self):
+    #Renvoie les informations importantes de la piéce
+    return{
+        "nom": self.nom,
+        "rarete": self.rarete,
+        "cout": self.cout_gemmes,  #le cout d'entreé 
+        "portes": dict(self.portes),  #copie l'etat des portes 
+        "objets": len(self.objets_dans_la_piece)  #le nombre d'objet présents 
+    }
+    
+def entrer(self,joueur):
+
+    #tente de faire entrer le joueur dans la piéce si le joueur a assez de gammes ou pas 
+    if joueur.gemmes >= self.cout_gemmes:  #assez de gemmes pour payer le cout
+        joueur.gemmes-=self.cout_gemmes     #debite le cout en gemmes sur le joueur 
+        return True 
+    else:
+        return False 
+  
