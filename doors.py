@@ -140,3 +140,16 @@ class RoomShape(Enum):
     DEAD_END = auto()
     SPECIAL =  auto()
 
+def default_state_from_rarity(r: Rarity) -> DoorState:
+    """convertit une rareter en état par défaut de porte 
+       Args:
+       r (Rarity): Rareté (COMMON, RARE, EPIC).
+       Returns:
+       DoorState: état initial associé a la rareté
+       """
+    return{
+        Rarity.COMMON: DoorState.UNLOCKED,
+        Rarity.RARE: DoorState.LOCKED,
+        Rarity.EPIC: DoorState.DOUBLE_LOCKED,
+
+    }[r]
