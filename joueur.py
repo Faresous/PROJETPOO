@@ -1,17 +1,19 @@
 class joueur:
     def __init__(self,ligne_depart,colonne_depart):
-        # tes attribut 
-        #position dde joeur dans la grille 
-        self.ligne=ligne_depart
-        self.colonne=colonne_depart
-        #consomable
+        # Position du joueur dans la grille 
+        
+        self.ligne = ligne_depart
+        self.colonne = colonne_depart
+        
+        # Objets Consomables
         self.pas = 70
         self.orr = 0
         self.gemmes = 2
         self.cles = 0
         self.des = 0
-        #objets permanants que le joueur trouvera 
-        self.objet_permanents=[]
+        
+        # Objets permanants que le joueur trouvera 
+        self.objet_permanents={}
 
     def move (self, dep_ligne, dep_colonne) :
         """ Déplacement du joueur sur la grille
@@ -19,12 +21,13 @@ class joueur:
             dep_ligne (int): Déplacement du joueur suivant les lignes 
             dep_colonne (int): Déplacement du joueur suivant les colonnes 
         """
-        if self.pas > 0:
+        if self.pas > 0 :
             self.pas -= 1 
             self.ligne += dep_ligne
             self.colonne += dep_colonne
             return True
-        return False 
+        
+        raise ValueError("L'attribut pas doit être positif ")
     
     def utiliser_gems (self, nb_gems) :
         """ Utiliser et dépenser des gems. Renvoie True si réussi
@@ -36,6 +39,7 @@ class joueur:
         
         if self.gemmes >= nb_gems : 
             self.gemmes -= nb_gems
+            print(f"Le joueur a dépensé {nb_gems} gemmes !")  
             return True
         return False
     
@@ -52,8 +56,10 @@ class joueur:
         items = {'Pelle', 'Marteau', 'kit de crochetage', 'Detecteur de méteaux', 'Patte de lapin'}
         
         # Si la quatité est pas un entier ou si elle est négative : ERREUR !!
-        if not isinstance(quantite, int) or quantite < 0:
-            return False
+        if not isinstance(quantite, int) :
+            raise TypeError ("L'attribut quantité doit être un entier")    
+        if quantite < 0 :
+            raise ValueError("L'attribut quantité doit être positif ")
         
         # Objets permanants
         if item in items :
