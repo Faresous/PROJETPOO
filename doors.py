@@ -1,4 +1,7 @@
 import random
+from __future__ import annotations
+from enum import Enum, IntEnum, auto
+from typing import Tuple
 rng = random.Random()          
 
 ROWS = 9  # nb de lignes
@@ -88,7 +91,7 @@ def entrer(self,joueur):
     else:
         return False 
   
-class orientation(str, Enum):
+class Orientation(str, Enum):
     """orientations cardinales utilisables par les portes 
        Membres: 
             N: Nord 
@@ -121,4 +124,19 @@ class DoorState(str, Enum):
     UNLOCKED = "UNLOCKED"
     LOCKED = "LOCKED"
     DOUBLE_LOCKED = "DOUBLE_LOCKED"
+class RoomShape(Enum):
+    """Topologie de la salle 
+        Membres:FOUR_WAY: quatre portes(N,E,S,O)
+                T_SHAPE: trois portes en T 
+                L_shape: deux portes adjacentes 
+                STRAIGHT: deux portes opposées 
+                DEAD_END: Une seule porte 
+                SPECIAL: Cas irréguliers ou spécifiques 
+                """
+    FOUR_WAY = auto()
+    T_SHAPE =  auto()
+    L_SHAPE =  auto()
+    STRAIGHT = auto()
+    DEAD_END = auto()
+    SPECIAL =  auto()
 
