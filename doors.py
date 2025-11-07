@@ -1,8 +1,8 @@
-import random
 from __future__ import annotations
+
+import random
+from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
-from typing import Tuple
-from dataclasses import dataclass
 from typing import Dict, Optional, Any, Set, Tuple, List
 rng = random.Random()          
 
@@ -251,5 +251,24 @@ class RoomSpec:
      cost_gems: Optional [int]=None
      door_behavior: Optional [str]= None
      exits: Optional [int]= None
+
+@dataclass
+class Room:
+ """ represnte une salle concrete issue d'un modele statique avec ca porte
+     son contenu et ses effets temporaires
+     Args:
+     spec (RoomSpec): référence a la specification statique de la salle 
+     doors (Dict[Orientation, Door]): dictionnaire associant chaque orientation
+     loot (Tuple[str, ...]): Ensemble des objets ou ressources trouvables dans la salle
+     effects (Dict[str, Any]): États temporaires ou effets actifs (ex. 'active_doors').
+      Returns:
+        Room: Instance initialisée d'une salle avec ses composants dynamiques.
+
+     """
+ spec: RoomSpec
+ doors: Dict[Orientation, Door]=field(default_factory=dict)
+ loot: Tuple[str, ...] = ()
+ effects: Dict[str, Any]=field(default_factory=dict)
+ 
 
 
