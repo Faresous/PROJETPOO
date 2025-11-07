@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum, IntEnum, auto
 from typing import Tuple
 from dataclasses import dataclass
-from typing import Set
+from typing import Dict, Optional, Any, Set, Tuple, List
 rng = random.Random()          
 
 ROWS = 9  # nb de lignes
@@ -218,3 +218,38 @@ class Door:
             return False
         return False
     
+@dataclass(frozen=True)
+class RoomSpec:
+     """Spécification statique d'un type de salle.
+
+    Rôle:
+        Décrit les caractéristiques fixes une salle (identité, forme, coût, comportement des portes).
+
+    Args:
+        key (str): Identifiant unique de la salle.
+        name (str): Nom affiché.
+        desc (str): Description textuelle.
+        shape (RoomShape): Topologie géométrique (FOUR_WAY, L_SHAPE, etc.).
+        icon (Optional[str]): Icône ou image associée.
+        tags (Tuple[str, ...]): Étiquettes de catégorisation (ex. 'magique', 'piège').
+        rarity_label (Optional[str]): Indication de rareté textuelle.
+        cost_gems (Optional[int]): Coût d'accès en gemmes.
+        door_behavior (Optional[str]): Comportement particulier des portes.
+        exits (Optional[int]): Nombre de sorties pour les salles SPECIAL.
+
+    Returns:
+        RoomSpec: Instance immuable contenant la description complète d'une salle.
+    """
+     Key: str
+     name: str
+     desc: str
+     shape: str
+     icon: RoomShape
+     icon: Optional [str]=None 
+     tags: Tuple[str, ...] = ()
+     rarity_label: Optional [str]= None
+     cost_gems: Optional [int]=None
+     door_behavior: Optional [str]= None
+     exits: Optional [int]= None
+
+
