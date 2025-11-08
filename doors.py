@@ -625,6 +625,12 @@ def catalog_doors_41(seed: int = 42, row: int = 4) -> List[dict]:
     assert len(catalog) == 41, f"Attendu 41 portes, obtenu {len(catalog)}"
     return catalog
 
-
+if __name__ == "__main__":
+    """
+    Exemple d' usage: imprime le catalogue des 41 portes avec état courant.
+    """
+    cat = catalog_doors_41(seed=42, row=4)
+    for i, d in enumerate(cat, 1):
+        print(f"{i:02d}. {d['room']:>15} | {d['orientation']} | rarity={d['rarity']} | state={d['state']} | {d['notes']}")
 
 
