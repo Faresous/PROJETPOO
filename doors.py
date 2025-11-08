@@ -534,6 +534,34 @@ Retour:
 }
 
 
+def make_doors_for_shape(
+    shape: RoomShape,
+    row: int,
+    rng: Optional[random.Random],
+) -> Dict[Orientation, Door]:
+    """
+    Génère les portes dune salle en fonction de sa forme et de la ligne.
+
+    Utilise door_level_by_row pour déterminer la rareté puis mappe
+    vers létat par défaut.
+
+    Args:
+        shape: topologie de la salle.
+        row: indice de ligne de progression.
+        rng: générateur aléatoire optionnel.
+
+    Returns:
+        dict[Orientation, Door]: portes configurées.
+    """
+    dirs = shape_Orientations(shape)
+    if not rng:
+        rng = random.Random()
+    out: Dict[Orientation, Door] = {}
+    for d in dirs:
+        r = Rarity(door_level_by_row(row, rng=rng))  # conversion int -> Rarity
+        out[d] = Door(rarity=r, state=default_state_from_rarity(r))
+    return out
+
 
 
 
