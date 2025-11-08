@@ -64,24 +64,41 @@ class Door:
 
     def open(self, inventory: set[str]) -> bool:
         """
-        Ouvre la porte selon les clés disponibles puis place l'état à UNLOCKED.
-        Règle de décision:
-          - UNLOCKED → True
-          - LOCKED → True si "key" ou "key_{rarity}"
-          - DOUBLE_LOCKED → True si "master_key" ET "key_{rarity}"
+        Ouvre la porte en appliquant la règle:
+          - UNLOCKED (niv 0): gratuit.
+          - LOCKED   (niv 1): coûte 1 clé, OU gratuit si lockpick=True.
+          - DOUBLE_LOCKED (niv 2): coûte 1 clé; le lockpick ne fonctionne pas.
+
+        Args:
+            resources: dict muté en place, ex:
+                {
+                    "keys": int,        # nombre de clés disponibles
+                    "lockpick": bool,   # kit de crochetage disponible ?
+                }
+
+        Returns:
+            bool: True si ouverture effectuée, False sinon.
         """
+
         if self.state == DoorState.UNLOCKED:
             return True
 
-        need = f"key_{int(self.rarity)}"
+        keys = int(resources.get("keys", 0))
+        lockpick = bool(resources.get("kit de crochetage", False))
+
         if self.state == DoorState.LOCKED:
-            if "key" in inventory or need in inventory:
+            if lockpick:
+                self.state = DoorState.UNLOCKED
+                return True
+            if keys > 0:
+                resources["keys"] = keys - 1
                 self.state = DoorState.UNLOCKED
                 return True
             return False
 
         if self.state == DoorState.DOUBLE_LOCKED:
-            if "master_key" in inventory and need in inventory:
+            if keys > 0:
+                resources["keys"] = keys - 1
                 self.state = DoorState.UNLOCKED
                 return True
             return False
