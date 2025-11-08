@@ -144,16 +144,15 @@ class Room:
         if rng is None:
             rng = random.Random()
 
+        # Dans Room.on_enter, cas VESTIBULE
         if self.spec.key == "VESTIBULE":
-            # S'assure d’avoir 4 portes
+        # garantit 4 portes présentes
             for d in (Orientation.N, Orientation.E, Orientation.S, Orientation.O):
-                self.doors.setdefault(d, Door(rarity=Rarity.COMMON, state=DoorState.LOCKED))
-            all_dirs = list(self.doors.keys())
-            if all_dirs:
-                locked_dir = rng.choice(all_dirs)
-                for d, door in self.doors.items():
-                    door.state = DoorState.LOCKED if d == locked_dir else DoorState.UNLOCKED
-                self.effects["vestibule_locked"] = locked_dir.value
+                self.doors.setdefault(d, Door(rarity=Rarity.COMMON, state=DoorState.UNLOCKED))
+            locked_dir = (rng or random.Random()).choice(list(self.doors.keys()))
+            for d, door in self.doors.items():
+                door.state = DoorState.LOCKED if d == locked_dir else DoorState.UNLOCKED
+            self.effects["vestibule_locked"] = locked_dir.value
 
         if self.spec.key == "ROTUNDA":
             if self.doors:
