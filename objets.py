@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 class objet(ABC):
     """
-    Classe abstraite définit le plan de base pour les objets du jeu.
+    Classe abstraite qui définit le plan de base pour les objets du jeu.
     
     Args:
         nom (str): Le nom de l'objet
@@ -26,6 +26,27 @@ class objetpermanent(objet):
     def utiliser(self, joueur):
         print(f"L'objet {self.nom} est un objet permanent")
 
+class Pelle(objetpermanent):
+    """
+    Permet de creuser pour trouver des objets
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Pelle",
+            description="Permet de creuser"
+        )
+        
+class Marteau(objetpermanent):
+    """
+    Permet de briser les cadenas des coffres, permettant de les ouvrir
+    sans depenser de cle.
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Marteau",
+            description="Permet de briser les cadenas"
+        )
+
 # OBJETS CONSOMMABLES :
 
 class objetconsommable(objet):
@@ -48,7 +69,7 @@ class objetconsommable(objet):
         print(f"Le joueur utilise L'objet {self.nom}")
         
         
-    def est_epuise(self):
+    def epuise(self):
         """
         Vérifie si l'objet est épuisé.
         """
