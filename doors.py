@@ -433,17 +433,3 @@ class Rooms:
                 catalog.append(entry)
         assert len(catalog) == 41, f"Attendu 41 portes, obtenu {len(catalog)}"
         return catalog
-
-
-# =========================================================
-# Exécution autonome (outil de vérification)
-# =========================================================
-
-if __name__ == "__main__":
-    """
-    Exemple d’usage: imprime le catalogue des 41 portes avec état courant.
-    Utile pour tester rapidement la cohérence depuis la ligne de commande.
-    """
-    cat = Rooms.catalog_doors_41(seed=42, row=4)
-    for i, d in enumerate(cat, 1):
-        print(f"{i:02d}. {d['room']:>15} | {d['orientation']} | rarity={d['rarity']} | state={d['state']} | {d['notes']}")
