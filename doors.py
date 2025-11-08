@@ -338,192 +338,195 @@ class Rooms:
 
         # ---------- Base de données intégrée ----------
     ROOMS_DB: Dict[str, RoomSpec] = {
-        #  Zone neutre, point d’accès
-        "FOUNDATION": RoomSpec(
-            key="FOUNDATION", name="The Foundation",
-            desc="Accès au sous-sol via clé de Basement.",
-            shape=RoomShape.STRAIGHT, color=RoomColor.BLUE,
-            tags=("blueprint",),
-            rarity_label="N/A", cost_gems=0,
-            door_behavior="Basement via clé dédiée.",
-        ),
+        # 001–012
+        "FOUNDATION": RoomSpec(key="FOUNDATION", name="Foundation",
+            desc="Pièce permanente avec accès au sous-sol.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint","permanent"), rarity_label="Rare", cost_gems=0),
 
-        #  Grande salle d’entrée
-        "ENTRANCE_HALL": RoomSpec(
-            key="ENTRANCE_HALL", name="Entrance Hall",
-            desc="Salle de départ, trois portes en avant.",
-            shape=RoomShape.T_SHAPE, color=RoomColor.ORANGE,
-            tags=("permanent", "blueprint"),
-            rarity_label="N/A", cost_gems=0,
-        ),
+        "ENTRANCE_HALL": RoomSpec(key="ENTRANCE_HALL", name="Entrance Hall",
+            desc="Point de départ quotidien. Trois portes.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.ORANGE, tags=("permanent","blueprint"), rarity_label="N/A", cost_gems=0),
 
-        #  Chambre standard
-        "SPARE_ROOM": RoomSpec(
-            key="SPARE_ROOM", name="Spare Room",
-            desc="Peut offrir l’upgrade Spare Foyer.",
-            shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET,
-            tags=("blueprint",),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        "SPARE_ROOM": RoomSpec(key="SPARE_ROOM", name="Spare Room",
+            desc="Salle neutre pouvant être améliorée.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Common"),
 
-        #  Salle mécanique rotative
-        "ROTUNDA": RoomSpec(
-            key="ROTUNDA", name="Rotunda",
-            desc="Salle circulaire qui fait tourner l’accès aux portes.",
-            shape=RoomShape.FOUR_WAY, color=RoomColor.BLUE,
-            tags=("blueprint", "mechanical"),
-            rarity_label="Rare", cost_gems=3,
-            door_behavior="Deux portes accessibles à la fois.",
-        ),
+        "ROTUNDA": RoomSpec(key="ROTUNDA", name="Rotunda",
+            desc="Salle rotative. Deux portes actives à la fois.", shape=RoomShape.FOUR_WAY,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Common", cost_gems=3),
 
-        #  Salon / pièce à vivre
-        "PARLOR": RoomSpec(
-            key="PARLOR", name="Parlor",
-            desc="Salle de détente, effets de repos.",
-            shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET,
-            tags=("blueprint",),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        "PARLOR": RoomSpec(key="PARLOR", name="Parlor",
+            desc="Puzzle du salon.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
 
-        #  Salle de jeu
-        "BILLIARD_ROOM": RoomSpec(
-            key="BILLIARD_ROOM", name="Billiard Room",
-            desc="Chambre avec effets de regain.",
-            shape=RoomShape.STRAIGHT, color=RoomColor.VIOLET,
-            tags=("blueprint",),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        "BILLIARD_ROOM": RoomSpec(key="BILLIARD_ROOM", name="Billiard Room",
+            desc="Puzzle de fléchettes.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
 
-        #  Galerie d’art
-        "GALLERY": RoomSpec(
-            key="GALLERY", name="Gallery",
-            desc="Salle d’exposition, effets de repos.",
-            shape=RoomShape.STRAIGHT, color=RoomColor.VIOLET,
-            tags=("blueprint",),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        "GALLERY": RoomSpec(key="GALLERY", name="Gallery",
+            desc="Galerie, liée à Room 8.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
 
-        #  Petit local commun
-        "CLOSET": RoomSpec(
-            key="CLOSET", name="Closet",
-            desc="Dead End contenant des objets communs.",
-            shape=RoomShape.DEAD_END, color=RoomColor.BLUE,
-            tags=("blueprint", "dead_end"),
-            rarity_label="Commonplace", cost_gems=0,
-            door_behavior="Cul-de-sac.",
-        ),
+        "ROOM_8": RoomSpec(key="ROOM_8", name="Room 8",
+            desc="Pièce verrouillée par la clé Room 8.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint","puzzle"), rarity_label="Rare"),
 
-        #  Variante du précédent
-        "WALKIN_CLOSET": RoomSpec(
-            key="WALKIN_CLOSET", name="Walk-in Closet",
-            desc="Variante du closet, commune.",
-            shape=RoomShape.DEAD_END, color=RoomColor.BLUE,
-            tags=("blueprint", "dead_end"),
-            rarity_label="Commonplace", cost_gems=0,
-        ),
+        "CLOSET": RoomSpec(key="CLOSET", name="Closet",
+            desc="Cul-de-sac avec objets.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Commonplace"),
 
-        #  Couloir classique
-        "HALLWAY": RoomSpec(
-            key="HALLWAY", name="Hallway",
-            desc="Couloir simple reliant deux pièces.",
-            shape=RoomShape.STRAIGHT, color=RoomColor.ORANGE,
-            tags=("hallway", "commonplace"),
-            rarity_label="Commonplace", cost_gems=0,
-        ),
+        "WALKIN_CLOSET": RoomSpec(key="WALKIN_CLOSET", name="Walk-in Closet",
+            desc="Variante du closet.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Commonplace"),
 
-        #  Magasin / foyer d’échange
-        "FOYER": RoomSpec(
-            key="FOYER", name="Foyer",
-            desc="Permet d’échanger des ressources et déverrouille des couloirs.",
-            shape=RoomShape.T_SHAPE, color=RoomColor.YELLOW,
-            tags=("hallway",),
-            rarity_label="Standard", cost_gems=0,
-            door_behavior="Effet global sur Hallways.",
-        ),
+        "ATTIC": RoomSpec(key="ATTIC", name="Attic",
+            desc="Grenier, dead-end avec 8 objets.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3),
 
-        #  Vestibule : porte aléatoirement verrouillée
-        "VESTIBULE": RoomSpec(
-            key="VESTIBULE", name="Vestibule",
-            desc="À l’entrée: 1 porte LOCKED, 3 UNLOCKED.",
-            shape=RoomShape.FOUR_WAY, color=RoomColor.ORANGE,
-            tags=("hallway",),
-            rarity_label="Standard", cost_gems=0,
-            door_behavior="Verrouillage aléatoire d’une porte.",
-        ),
+        "STOREROOM": RoomSpec(key="STOREROOM", name="Storeroom",
+            desc="Dead-end: 1 gemme, 1 clé, 1 pièce.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Common"),
 
-        #  Grand hall
-        "GREAT_HALL": RoomSpec(
-            key="GREAT_HALL", name="Great Hall",
-            desc="Grand couloir principal.",
-            shape=RoomShape.FOUR_WAY, color=RoomColor.ORANGE,
-            tags=("hallway",),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        # 013–024
+        "NOOK": RoomSpec(key="NOOK", name="Nook",
+            desc="Contient toujours 1 clé.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Commonplace"),
 
-        #  Aquarium-jardin
-        "AQUARIUM": RoomSpec(
-            key="AQUARIUM", name="Aquarium",
-            desc="Salle lumineuse comptant comme jardin intérieur.",
-            shape=RoomShape.T_SHAPE, color=RoomColor.GREEN,
-            tags=("blueprint", "hallway"),
-            rarity_label="Unusual", cost_gems=1,
-            door_behavior="Compté comme Hallway et profite du FOYER.",
-        ),
+        "GARAGE": RoomSpec(key="GARAGE", name="Garage",
+            desc="Dead-end. Trois clés au mur.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Unusual", cost_gems=1),
 
-        #  Passage secret : effet piégeant
-        "SECRET_PASSAGE": RoomSpec(
-            key="SECRET_PASSAGE", name="Secret Passage",
-            desc="Faux cul-de-sac avec effet imprévisible (piège).",
-            shape=RoomShape.DEAD_END, color=RoomColor.RED,
-            tags=("blueprint", "dead_end"),
-            rarity_label="Unusual", cost_gems=1,
-        ),
+        "MUSIC_ROOM": RoomSpec(key="MUSIC_ROOM", name="Music Room",
+            desc="Feuilles de musique, 1 clé spéciale.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard", cost_gems=2),
 
-        #  Garage neutre
-        "GARAGE": RoomSpec(
-            key="GARAGE", name="Garage",
-            desc="Dead End. Clés près de l’entrée.",
-            shape=RoomShape.DEAD_END, color=RoomColor.BLUE,
-            tags=("blueprint", "dead_end"),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        "LOCKER_ROOM": RoomSpec(key="LOCKER_ROOM", name="Locker Room",
+            desc="Diffuse des clés dans le manoir.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint","spread","mechanical"), rarity_label="Rare", cost_gems=1),
 
-        #  Salle au trésor
-        "VAULT": RoomSpec(
-            key="VAULT", name="Vault",
-            desc="Dead End avec or et gemmes à récupérer.",
-            shape=RoomShape.DEAD_END, color=RoomColor.GREEN,
-            tags=("blueprint", "dead_end"),
-            rarity_label="Unusual", cost_gems=2,
-        ),
+        "DEN": RoomSpec(key="DEN", name="Den",
+            desc="Toujours 1 gemme. Portes en T.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Commonplace"),
 
-        #  Salle de contrôle
-        "SECURITY": RoomSpec(
-            key="SECURITY", name="Security",
-            desc="Contrôle des portes mécaniques de sécurité.",
-            shape=RoomShape.L_SHAPE, color=RoomColor.BLUE,
-            tags=("blueprint", "mechanical"),
-            rarity_label="Unusual", cost_gems=2,
-        ),
+        "WINE_CELLAR": RoomSpec(key="WINE_CELLAR", name="Wine Cellar",
+            desc="Toujours 3 gemmes. Dead-end.", shape=RoomShape.DEAD_END,
+            color=RoomColor.GREEN, tags=("blueprint","dead_end"), rarity_label="Commonplace"),
 
-        #  Entretien / maintenance
-        "UTILITY_CLOSET": RoomSpec(
-            key="UTILITY_CLOSET", name="Utility Closet",
-            desc="Coupe-circuits du manoir.",
-            shape=RoomShape.DEAD_END, color=RoomColor.BLUE,
-            tags=("blueprint",),
-            rarity_label="Standard", cost_gems=0,
-        ),
+        "TROPHY_ROOM": RoomSpec(key="TROPHY_ROOM", name="Trophy Room",
+            desc="Musée des trophées. 8 gemmes.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard", cost_gems=5),
 
-        #  Sanctuaire final (rare, mystique)
-        "INNER_SANCTUM": RoomSpec(
-            key="INNER_SANCTUM", name="Inner Sanctum",
-            desc="Grande salle à 8 portes via Sanctum Keys.",
-            shape=RoomShape.SPECIAL, color=RoomColor.VIOLET,
-            tags=("special",),
-            rarity_label="Rare", exits=8,
-        ),
+        "BALLROOM": RoomSpec(key="BALLROOM", name="Ballroom",
+            desc="À l’entrée, fixe les gemmes à 2.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint","entry"), rarity_label="Unusual", cost_gems=2),
+
+        "PANTRY": RoomSpec(key="PANTRY", name="Pantry",
+            desc="Fruit aléatoire et 4 pièces.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Commonplace"),
+
+        "RUMPUS_ROOM": RoomSpec(key="RUMPUS_ROOM", name="Rumpus Room",
+            desc="Automate diseur de bonne aventure. 8 pièces.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard", cost_gems=1),
+
+        "VAULT": RoomSpec(key="VAULT", name="Vault",
+            desc="Dead-end: 40 pièces. Coffres numérotés.", shape=RoomShape.DEAD_END,
+            color=RoomColor.GREEN, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3),
+
+        "OFFICE": RoomSpec(key="OFFICE", name="Office",
+            desc="Terminal: paie, email, diffusion de pièces.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.YELLOW, tags=("blueprint","spread","terminal"), rarity_label="Standard", cost_gems=2),
+
+        # 025–036
+        "DRAWING_ROOM": RoomSpec(key="DRAWING_ROOM", name="Drawing Room",
+            desc="Un reroll gratuit lors du draft. T-shape.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "STUDY": RoomSpec(key="STUDY", name="Study",
+            desc="Rerolls payants jusqu’à 8 fois.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "LIBRARY": RoomSpec(key="LIBRARY", name="Library",
+            desc="Découvre des plans moins communs. L-shape.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "CHAMBER_OF_MIRRORS": RoomSpec(key="CHAMBER_OF_MIRRORS", name="Chamber of Mirrors",
+            desc="Autorise un second exemplaire de salles. Récompense permanente.", shape=RoomShape.DEAD_END,
+            color=RoomColor.RED, tags=("blueprint","puzzle"), rarity_label="Unusual"),
+
+        "THE_POOL": RoomSpec(key="THE_POOL", name="The Pool",
+            desc="Ajoute Locker Room, Sauna, Pump Room au pool du jour.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.GREEN, tags=("blueprint",), rarity_label="Standard"),
+
+        "DRAFTING_STUDIO": RoomSpec(key="DRAFTING_STUDIO", name="Drafting Studio",
+            desc="Ajoute définitivement un floorplan au pool.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "UTILITY_CLOSET": RoomSpec(key="UTILITY_CLOSET", name="Utility Closet",
+            desc="Tableau électrique. Dead-end.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical","dead_end"), rarity_label="Standard"),
+
+        "BOILER_ROOM": RoomSpec(key="BOILER_ROOM", name="Boiler Room",
+            desc="Salle mécanique. Alimente en énergie.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Standard"),
+
+        "PUMP_ROOM": RoomSpec(key="PUMP_ROOM", name="Pump Room",
+            desc="Salle mécanique. Modifie niveaux d’eau. L-shape.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Standard"),
+
+        "SECURITY": RoomSpec(key="SECURITY", name="Security",
+            desc="Terminal sécurité. Paramètre portes électroniques. L-shape.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical","terminal"), rarity_label="Standard"),
+
+        "WORKSHOP": RoomSpec(key="WORKSHOP", name="Workshop",
+            desc="Combine des objets en outils hybrides.", shape=RoomShape.STRAIGHT,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Standard"),
+
+        "LABORATORY": RoomSpec(key="LABORATORY", name="Laboratory",
+            desc="Expériences; déblocages permanents. L-shape.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint","mechanical","terminal"), rarity_label="Standard"),
+
+        # 037–046
+        "SAUNA": RoomSpec(key="SAUNA", name="Sauna",
+            desc="Demain: +20 pas. Dead-end.", shape=RoomShape.DEAD_END,
+            color=RoomColor.VIOLET, tags=("blueprint","dead_end"), rarity_label="Standard"),
+
+        "COAT_CHECK": RoomSpec(key="COAT_CHECK", name="Coat Check",
+            desc="Dépose un objet pour le récupérer un autre jour. Dead-end.", shape=RoomShape.DEAD_END,
+            color=RoomColor.YELLOW, tags=("blueprint","dead_end"), rarity_label="Standard"),
+
+        "MAIL_ROOM": RoomSpec(key="MAIL_ROOM", name="Mail Room",
+            desc="Lettre livrée le lendemain. Dead-end.", shape=RoomShape.DEAD_END,
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Standard"),
+
+        "FREEZER": RoomSpec(key="FREEZER", name="Freezer",
+            desc="Fige comptes jusqu’au lendemain. Dead-end.", shape=RoomShape.DEAD_END,
+            color=RoomColor.RED, tags=("blueprint","dead_end"), rarity_label="Standard"),
+
+        "DINING_ROOM": RoomSpec(key="DINING_ROOM", name="Dining Room",
+            desc="À rang 8: consommer le plat pour +20/30 pas.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "OBSERVATORY": RoomSpec(key="OBSERVATORY", name="Observatory",
+            desc="+1 étoile permanente; constellations.", shape=RoomShape.L_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "CONFERENCE_ROOM": RoomSpec(key="CONFERENCE_ROOM", name="Conference Room",
+            desc="Centralise les objets diffusés par d’autres salles. T-shape.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
+
+        "AQUARIUM": RoomSpec(key="AQUARIUM", name="Aquarium",
+            desc="Compte comme tous les types.", shape=RoomShape.T_SHAPE,
+            color=RoomColor.BLUE, tags=("blueprint","hallway"), rarity_label="Unusual", cost_gems=1),
+
+        "ANTECHAMBER": RoomSpec(key="ANTECHAMBER", name="Antechamber",
+            desc="Cible visible; portes scellées à rouvrir chaque jour.", shape=RoomShape.FOUR_WAY,
+            color=RoomColor.BLUE, tags=("goal-adjacent",), rarity_label="N/A"),
+            
+        "ROOM_46": RoomSpec(key="ROOM_46", name="Room 46",
+            desc="Objectif du jeu. Couronne royale.", shape=RoomShape.SPECIAL,
+            color=RoomColor.VIOLET, tags=("goal",), rarity_label="Rumored"),
     }
+
 
 
     # ---------- Usines / Générateurs ----------
