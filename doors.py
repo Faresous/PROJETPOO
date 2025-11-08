@@ -252,23 +252,47 @@ class RoomSpec:
      door_behavior: Optional [str]= None
      exits: Optional [int]= None
 
+
 @dataclass
 class Room:
- """ represnte une salle concrete issue d'un modele statique avec ca porte
-     son contenu et ses effets temporaires
-     Args:
-     spec (RoomSpec): référence a la specification statique de la salle 
-     doors (Dict[Orientation, Door]): dictionnaire associant chaque orientation
-     loot (Tuple[str, ...]): Ensemble des objets ou ressources trouvables dans la salle
-     effects (Dict[str, Any]): États temporaires ou effets actifs (ex. 'active_doors').
-      Returns:
-        Room: Instance initialisée d'une salle avec ses composants dynamiques.
+    """Représente une salle concrète issue d’un modèle statique, avec ses portes,
+    son contenu et ses effets temporaires.
 
-     """
- spec: RoomSpec
- doors: Dict[Orientation, Door]=field(default_factory=dict)
- loot: Tuple[str, ...] = ()
- effects: Dict[str, Any]=field(default_factory=dict)
- 
+    Args:
+        spec (RoomSpec): Référence à la spécification statique de la salle.
+        doors (Dict[Orientation, Door]): Dictionnaire orientation → porte.
+        loot (Tuple[str, ...]): Objets ou ressources trouvables.
+        effects (Dict[str, Any]): États/effets actifs (ex. 'active_doors').
+
+    Returns:
+        Room: Instance initialisée avec ses composants dynamiques.
+    """
+    spec: RoomSpec
+    doors: Dict[Orientation, Door] = field(default_factory=dict)
+    loot: Tuple[str, ...] = ()
+    effects: Dict[str, Any] = field(default_factory=dict)
+
+    def summary(self) -> dict:
+        """Génère un résumé sérialisable (affichage, debug, sauvegarde JSON).
+
+        Returns:
+            dict: Infos générales, forme, tags, état des portes, effets actifs.
+        """
+        return {
+            "key": self.spec.key,
+            "name": self.spec.name,
+            "desc": self.spec.desc,
+            "shape": self.spec.shape.name,
+            "tags": list(self.spec.tags),
+            "doors": {
+                d.value: {"rarity": int(dr.rarity), "state": dr.state.value}
+                for d, dr in self.doors.items()
+            },
+            "effects": self.effects,
+        }
+
+
+
+
 
 
