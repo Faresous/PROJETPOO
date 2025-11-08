@@ -24,6 +24,14 @@ class Orientation(str, Enum):
     S = "S"  # Sud
     O = "O"  # Ouest
 
+class RoomColor(Enum):
+    YELLOW = "YELLOW"  # magasins
+    GREEN  = "GREEN"   # jardins: gemmes, creusage, permanents
+    VIOLET = "VIOLET"  # chambres: regain de pas
+    ORANGE = "ORANGE"  # couloirs: beaucoup de portes
+    RED    = "RED"     # pénalités: peu de portes, malus
+    BLUE   = "BLUE"    # commun, effets variés
+
 
 class Rarity(IntEnum):
     """Rareté des portes sur une échelle ordinale."""
