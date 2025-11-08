@@ -363,3 +363,180 @@ class Room:
         new_pair = (dirs[start_idx], dirs[(start_idx + 2) % 4])
         self.effects["active_doors"] = [new_pair[0].value, new_pair[1].value]
 
+# BD intégrée
+
+ROOMS_DB: Dict[str, RoomSpec] = {
+
+    
+"""
+ROOMS_DB
+--------
+Dictionaire qui contient toute les salles du manoire blue prince.
+
+Role:
+    Sert a stocker les informations fixe de chaque piece du jeux.
+    Chaque cle du dictionaire represente une salle et sa valeur
+    contient une instance de RoomSpec avec toute ses caracteristique.
+
+Structure:
+    ROOMS_DB: Dict[str, RoomSpec]
+        - cle (str): nom unique de la salle
+        - valeur (RoomSpec): objet qui decrit la piece (forme, cout, effet, portes)
+
+Contenu:
+    - FOUNDATION        : base d acces au sous sol
+    - ENTRANCE_HALL     : salle de depart avec 3 portes
+    - SPARE_ROOM        : salle secondaire optionel
+    - ROTUNDA           : salle mecanique avec portes qui tourne
+    - PARLOR            : salle en L standard
+    - BILLIARD_ROOM     : salle droite classique
+    - GALLERY           : salle droite classique
+    - CLOSET / WALKIN_CLOSET : cul de sac avec objet
+    - HALLWAY / GREAT_HALL   : couloir simple ou large
+    - FOYER / VESTIBULE      : piece d entree avec portes verouiller
+    - AQUARIUM / SECRET_PASSAGE / GARAGE / VAULT / SECURITY / UTILITY_CLOSET :
+      salles speciales avec mecanique ou tresor
+    - INNER_SANCTUM     : grande salle special avec 8 sortie
+
+Argument:
+    Aucun
+
+Retour:
+    Dictionaire qui contient toute les RoomSpec pour generer le manoire
+"""
+
+    "FOUNDATION": RoomSpec(
+        key="FOUNDATION", name="The Foundation",
+        desc="Accès au sous-sol via clé de Basement.",
+        shape=RoomShape.STRAIGHT, tags=("blueprint",),
+        rarity_label="N/A", cost_gems=0,
+        door_behavior="Basement via clé dédiée.",
+    ),
+    "ENTRANCE_HALL": RoomSpec(
+        key="ENTRANCE_HALL", name="Entrance Hall",
+        desc="Salle de départ, trois portes en avant.",
+        shape=RoomShape.T_SHAPE, tags=("permanent", "blueprint"),
+        rarity_label="N/A", cost_gems=0,
+    ),
+    "SPARE_ROOM": RoomSpec(
+        key="SPARE_ROOM", name="Spare Room",
+        desc="Peut offrir lupgrade Spare Foyer.",
+        shape=RoomShape.L_SHAPE, tags=("blueprint",),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "ROTUNDA": RoomSpec(
+        key="ROTUNDA", name="Rotunda",
+        desc="Salle circulaire qui fait tourner laccès aux portes.",
+        shape=RoomShape.FOUR_WAY, tags=("blueprint", "mechanical"),
+        rarity_label="Rare", cost_gems=3,
+        door_behavior="Deux portes accessibles à la fois.",
+    ),
+    "PARLOR": RoomSpec(
+        key="PARLOR", name="Parlor",
+        desc="Salle standard.",
+        shape=RoomShape.L_SHAPE, tags=("blueprint",),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "BILLIARD_ROOM": RoomSpec(
+        key="BILLIARD_ROOM", name="Billiard Room",
+        desc="Salle standard.",
+        shape=RoomShape.STRAIGHT, tags=("blueprint",),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "GALLERY": RoomSpec(
+        key="GALLERY", name="Gallery",
+        desc="Salle standard.",
+        shape=RoomShape.STRAIGHT, tags=("blueprint",),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "CLOSET": RoomSpec(
+        key="CLOSET", name="Closet",
+        desc="Dead End qui contient des items.",
+        shape=RoomShape.DEAD_END, tags=("blueprint", "dead_end"),
+        rarity_label="Commonplace", cost_gems=0,
+        door_behavior="Cul-de-sac.",
+    ),
+    "WALKIN_CLOSET": RoomSpec(
+        key="WALKIN_CLOSET", name="Walk-in Closet",
+        desc="Variante closet.",
+        shape=RoomShape.DEAD_END, tags=("blueprint", "dead_end"),
+        rarity_label="Commonplace", cost_gems=0,
+    ),
+    "HALLWAY": RoomSpec(
+        key="HALLWAY", name="Hallway",
+        desc="Couloir simple.",
+        shape=RoomShape.STRAIGHT, tags=("hallway", "commonplace"),
+        rarity_label="Commonplace", cost_gems=0,
+    ),
+    "FOYER": RoomSpec(
+        key="FOYER", name="Foyer",
+        desc="Déverrouille les portes des Hallways.",
+        shape=RoomShape.T_SHAPE, tags=("hallway",),
+        rarity_label="Standard", cost_gems=0,
+        door_behavior="Effet global sur Hallways.",
+    ),
+    "VESTIBULE": RoomSpec(
+        key="VESTIBULE", name="Vestibule",
+        desc="À lentrée: 1 porte LOCKED, 3 UNLOCKED.",
+        shape=RoomShape.FOUR_WAY, tags=("hallway",),
+        rarity_label="Standard", cost_gems=0,
+        door_behavior="Verrouillage aléatoire dune porte.",
+    ),
+    "GREAT_HALL": RoomSpec(
+        key="GREAT_HALL", name="Great Hall",
+        desc="Grand couloir.",
+        shape=RoomShape.FOUR_WAY, tags=("hallway",),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "AQUARIUM": RoomSpec(
+        key="AQUARIUM", name="Aquarium",
+        desc="Compte comme plusieurs types.",
+        shape=RoomShape.T_SHAPE, tags=("blueprint", "hallway"),
+        rarity_label="Unusual", cost_gems=1,
+        door_behavior="En tant que Hallway, profite du FOYER.",
+    ),
+    "SECRET_PASSAGE": RoomSpec(
+        key="SECRET_PASSAGE", name="Secret Passage",
+        desc="Faux Dead End avec choix de couleur.",
+        shape=RoomShape.DEAD_END, tags=("blueprint", "dead_end"),
+        rarity_label="Unusual", cost_gems=1,
+    ),
+    "GARAGE": RoomSpec(
+        key="GARAGE", name="Garage",
+        desc="Dead End. Clés près de lentrée.",
+        shape=RoomShape.DEAD_END, tags=("blueprint", "dead_end"),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "VAULT": RoomSpec(
+        key="VAULT", name="Vault",
+        desc="Dead End avec or.",
+        shape=RoomShape.DEAD_END, tags=("blueprint", "dead_end"),
+        rarity_label="Unusual", cost_gems=2,
+    ),
+    "SECURITY": RoomSpec(
+        key="SECURITY", name="Security",
+        desc="Contrôle des Security Doors.",
+        shape=RoomShape.L_SHAPE, tags=("blueprint", "mechanical"),
+        rarity_label="Unusual", cost_gems=2,
+    ),
+    "UTILITY_CLOSET": RoomSpec(
+        key="UTILITY_CLOSET", name="Utility Closet",
+        desc="Coupe-circuits.",
+        shape=RoomShape.DEAD_END, tags=("blueprint",),
+        rarity_label="Standard", cost_gems=0,
+    ),
+    "INNER_SANCTUM": RoomSpec(
+        key="INNER_SANCTUM", name="Inner Sanctum",
+        desc="Zone à 8 portes via Sanctum Keys.",
+        shape=RoomShape.SPECIAL, tags=("special",),
+        rarity_label="Rare", exits=8,
+    ),
+}
+
+
+
+
+
+
+
+
