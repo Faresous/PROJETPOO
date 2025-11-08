@@ -565,7 +565,7 @@ def make_doors_for_shape(
 
 def generate_room(spec_key: str, row: int, rng: Optional[random.Random] = None) -> Room:
     """
-    Instancie une Room depuis sa RoomSpec, génère ses portes et effets d’entrée.
+    Instancie une Room depuis sa RoomSpec, génère ses portes et effets d entrée.
 
     Args:
         spec_key: clé de ROOMS_DB.
@@ -582,6 +582,48 @@ def generate_room(spec_key: str, row: int, rng: Optional[random.Random] = None) 
     room = Room(spec=spec, doors=doors, effects={})
     room.on_enter(rng)
     return room
+
+def catalog_doors_41(seed: int = 42, row: int = 4) -> List[dict]:
+    """
+    Construit un catalogue déterministe de 41 portes à partir d’un sous-ensemble de salles.
+
+    Note:
+        La fonction vérifie qu’on obtient bien 41 entrées.
+
+    Args:
+        seed: graine RNG pour reproductibilité.
+        row: ligne utilisée pour le profil de rareté.
+
+    Returns:
+        list[dict]: liste des portes avec salle, orientation, rareté, état, notes.
+    """
+    rng = random.Random(seed)
+    room_keys = [
+        "FOUNDATION", "ENTRANCE_HALL", "SPARE_ROOM", "ROTUNDA", "PARLOR",
+        "BILLIARD_ROOM", "GALLERY", "CLOSET", "WALKIN_CLOSET", "HALLWAY",
+        "FOYER", "VESTIBULE", "GREAT_HALL", "AQUARIUM", "SECRET_PASSAGE",
+        "GARAGE", "VAULT", "SECURITY", "UTILITY_CLOSET"
+    ]
+    catalog: List[dict] = []
+    for key in room_keys:
+        room = generate_room(key, row=row, rng=rng)
+        active = set(room.effects.get("active_doors", []))  # Rotunda
+        for d, door in room.doors.items():
+            entry = {
+                "room": room.spec.key,
+                "name": room.spec.name,
+                "orientation": d.value,
+                "rarity": int(door.rarity),
+                "state": door.state.value,
+                "notes": ""
+            }
+            if active and d.value not in active:
+                entry["notes"] = "inactive_now"
+            if room.spec.key == "VESTIBULE" and room.effects.get("vestibule_locked") == d.value:
+                entry["notes"] = "locked_choice"
+            catalog.append(entry)
+    assert len(catalog) == 41, f"Attendu 41 portes, obtenu {len(catalog)}"
+    return catalog
 
 
 
