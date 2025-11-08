@@ -399,37 +399,3 @@ class Rooms:
         room = Room(spec=spec, doors=doors, effects={})
         room.on_enter(rng)
         return room
-
-    @staticmethod
-    def catalog_doors_41(seed: int = 42, row: int = 4) -> List[dict]:
-        """
-        Construit un catalogue déterministe de 41 portes à partir d’un sous-ensemble de salles.
-        Vérifie que l’on obtient bien 41 entrées.
-        """
-        rng = random.Random(seed)
-        room_keys = [
-            "FOUNDATION", "ENTRANCE_HALL", "SPARE_ROOM", "ROTUNDA", "PARLOR",
-            "BILLIARD_ROOM", "GALLERY", "CLOSET", "WALKIN_CLOSET", "HALLWAY",
-            "FOYER", "VESTIBULE", "GREAT_HALL", "AQUARIUM", "SECRET_PASSAGE",
-            "GARAGE", "VAULT", "SECURITY", "UTILITY_CLOSET"
-        ]
-        catalog: List[dict] = []
-        for key in room_keys:
-            room = Rooms.generate_room(key, row=row, rng=rng)
-            active = set(room.effects.get("active_doors", []))  # Rotunda
-            for d, door in room.doors.items():
-                entry = {
-                    "room": room.spec.key,
-                    "name": room.spec.name,
-                    "orientation": d.value,
-                    "rarity": int(door.rarity),
-                    "state": door.state.value,
-                    "notes": "",
-                }
-                if active and d.value not in active:
-                    entry["notes"] = "inactive_now"
-                if room.spec.key == "VESTIBULE" and room.effects.get("vestibule_locked") == d.value:
-                    entry["notes"] = "locked_choice"
-                catalog.append(entry)
-        assert len(catalog) == 41, f"Attendu 41 portes, obtenu {len(catalog)}"
-        return catalog
