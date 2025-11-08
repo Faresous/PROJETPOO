@@ -563,7 +563,25 @@ def make_doors_for_shape(
     return out
 
 
+def generate_room(spec_key: str, row: int, rng: Optional[random.Random] = None) -> Room:
+    """
+    Instancie une Room depuis sa RoomSpec, génère ses portes et effets d’entrée.
 
+    Args:
+        spec_key: clé de ROOMS_DB.
+        row: indice de ligne pour paramétrer les raretés.
+        rng: générateur aléatoire optionnel.
+
+    Returns:
+        Room: salle prête avec portes et effets initiaux.
+    """
+    if rng is None:
+        rng = random.Random()
+    spec = ROOMS_DB[spec_key]
+    doors = make_doors_for_shape(spec.shape, row, rng)
+    room = Room(spec=spec, doors=doors, effects={})
+    room.on_enter(rng)
+    return room
 
 
 
