@@ -234,7 +234,7 @@ class Doors:
     @staticmethod
     def make_for_shape(shape: RoomShape, row: int, rng: Optional[random.Random]) -> Dict[Orientation, Door]:
         """
-        Génère les portes d'une salle donnée sa forme et la ligne de progression.
+        Génère les portes d'une salle suivant sa forme et sa raretée.
         """
         dirs = Doors.shape_orientations(shape)
         rng = rng or random.Random()
@@ -243,13 +243,6 @@ class Doors:
             r = Rarity(Doors.level_by_row(row, rng=rng))
             out[d] = Door(rarity=r, state=Doors.default_state_from_rarity(r))
         return out
-
-    @staticmethod
-    def tirage_aléatoire_doors(row: int, rng: random.Random = rng_default) -> Dict[str, int]:
-        """
-        Tirage aléatoire de rareté par orientation, retourné sous forme { "N": 0/1/2, ... }.
-        """
-        return {d.value: Doors.level_by_row(row, rng=rng) for d in (Orientation.N, Orientation.E, Orientation.S, Orientation.O)}
 
 
 # =========================================================
