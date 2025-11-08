@@ -255,7 +255,7 @@ class RoomSpec:
 
 @dataclass
 class Room:
-    """Représente une salle concrète issue d’un modèle statique, avec ses portes,
+    """Représente une salle concrète issue d un modèle statique, avec ses portes,
     son contenu et ses effets temporaires.
 
     Args:
@@ -290,6 +290,50 @@ class Room:
             },
             "effects": self.effects,
         }
+    def on_enter(self, rng: Optional[random.Random] = None) -> None:
+        """Applique la logique d entrée lorsque la salle est visitée.
+
+        Rôle:
+            Initialise ou met à jour l état des portes et des effets spéciaux
+            en fonction du type de salle.
+
+        Cas particuliers:
+            - VESTIBULE :
+                • Garantit 4 portes présentes.
+                • Verrouille exactement une porte au hasard, déverrouille les autres.
+                • Enregistre la direction verrouillée dans effects['vestibule_locked'].
+            - ROTUNDA :
+                • Active exactement deux portes (ou moins si indisponibles) choisies au hasard.
+                • Enregistre les directions actives dans effects['active_doors'].
+
+        Effets de bord:
+            - Peut créer des portes manquantes (pour VESTIBULE) avec état LOCKED par défaut.
+            - Modifie létat des portes existantes (UNLOCKED/LOCKED).
+            - Met à jour le dictionnaire self.effects.
+
+        Args:
+            rng (Optional[random.Random]): Générateur pseudo-aléatoire à utiliser.
+                Si None, une instance locale est créée.
+
+        Returns:
+            None
+        """
+        if rng is None:
+            rng = random.Random()
+        if self.spec.key == "VESTIBULE":
+            if len(self.doors) < 4:
+                for d in (Orientation.N, Orientation.E, Orientation.S, Orientation.O):
+                    self.doors.setdefault(d, Door(rarity=Rarity.COMMON, state=DoorState.LOCKED))
+            all_dirs = list(self.doors.keys())
+            if all_dirs:
+                locked_dir = rng.choice(all_dirs)
+                for d, door in self.doors.items():
+                    door.state = DoorState.LOCKED if d == locked_dir else DoorState.UNLOCKED
+                self.effects["vestibule_locked"] = locked_dir.value
+        if self.spec.key == "ROTUNDA":
+            active = rng.sample(list(self.doors.keys()), k=min(2, len(self.doors)))
+            self.effects["active_doors"] = [d.value for d in active]
+
 
 
 
