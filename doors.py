@@ -200,6 +200,60 @@ class Room:
         start_idx = (dirs.index(pair[0]) + 1) % 4
         new_pair = (dirs[start_idx], dirs[(start_idx + 2) % 4])
         self.effects["active_doors"] = [new_pair[0].value, new_pair[1].value]
+    
+    
+    def apply_color_effects(room: Room, rng: Optional[random.Random] = None) -> None:
+    """
+    Applique automatiquement les effets associés à la couleur d'une pièce.
+
+    Rôle :
+        Cette fonction complète les effets dynamiques d'une salle en fonction
+        de sa couleur définie dans RoomSpec.color. Chaque couleur représente
+        une catégorie de pièce du manoir Blue Prince, et détermine les bonus,
+        malus ou comportements spéciaux lors de l'entrée dans la salle.
+
+    Détail des effets appliqués :
+        - 🟡 YELLOW (Magasin) :
+            Crée un espace d'échange d'objets où l'or peut être échangé contre des clés.
+            L'effet "shop" est activé avec des taux définis dans room.effects["shop"].
+        - 🟢 GREEN (Jardin) :
+            Génère aléatoirement des gemmes ou un emplacement de creusage ("dig_spot").
+            L'effet "garden" contient les ressources disponibles.
+        - 🟣 VIOLET (Chambre) :
+            Active un effet de repos augmentant les pas disponibles ("regain_steps").
+        - 🟠 ORANGE (Couloir) :
+            Indique que la salle privilégie les connexions multiples ("prefer_many_doors").
+        - 🔴 RED (Pièce piégée) :
+            Applique un malus (par exemple une perte de pas) dans "penalty".
+        - 🔵 BLUE (Pièce commune) :
+            Salle standard sans effet particulier, mais marquée "misc" pour cohérence.
+
+    Args:
+        room (Room): Instance de la salle courante dont les effets seront mis à jour.
+        rng (Optional[random.Random]): Générateur pseudo-aléatoire à utiliser
+            pour les effets variables (par exemple génération de gemmes).
+            Si None, un générateur local est instancié.
+
+    Effets de bord:
+        Modifie le dictionnaire room.effects en place selon la couleur de la pièce.
+
+    Returns:
+        None
+    """
+    rng = rng or random.Random()
+    c = room.spec.color
+    if c == RoomColor.YELLOW:
+        room.effects["shop"] = {"rates": {"gold_to_key": 1}, "enabled": True}
+    elif c == RoomColor.GREEN:
+        room.effects["garden"] = {"gems_spawn": rng.choice([0, 1, 2]), "dig_spot": True}
+    elif c == RoomColor.VIOLET:
+        room.effects["regain_steps"] = 1
+    elif c == RoomColor.ORANGE:
+        room.effects.setdefault("corridor_hint", "prefer_many_doors")
+    elif c == RoomColor.RED:
+        room.effects["penalty"] = {"steps_minus": 1}
+    elif c == RoomColor.BLUE:
+        room.effects.setdefault("misc", True)
 
 
 # =========================================================
