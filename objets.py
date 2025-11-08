@@ -47,6 +47,36 @@ class Marteau(objetpermanent):
             description="Permet de briser les cadenas"
         )
 
+class Kit_de_crochetage(objetpermanent):
+    """
+    Permet d ouvrir certaines portes, sans depenser de cle
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Kit de crochetage",
+            description="Ouvre les portes verrouillées"
+        )
+        
+class Detecteur_de_metaux(objetpermanent):
+    """
+    Augmente la chance de trouver des cles et des pieces
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Detecteur de metaux",
+            description="Augmente les chances de trouver des clés et pièces"
+        )
+        
+class Patte_de_lapin(objetpermanent):
+    """
+    Augmente la chance de trouver tous les objets
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Patte de lapin",
+            description="Augmente les chances de trouver des objets"
+        )
+
 # OBJETS CONSOMMABLES :
 
 class objetconsommable(objet):
@@ -74,3 +104,4 @@ class objetconsommable(objet):
         Vérifie si l'objet est épuisé.
         """
         return self.valeur <= 0
+
