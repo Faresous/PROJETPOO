@@ -333,10 +333,33 @@ class Room:
         if self.spec.key == "ROTUNDA":
             active = rng.sample(list(self.doors.keys()), k=min(2, len(self.doors)))
             self.effects["active_doors"] = [d.value for d in active]
+    
+    def rotate_rotunda(self) -> None:
+        """
+    Fait pivoter les deux portes actives d'une salle de type ROTUNDA.
 
+    Rôle:
+        - Vérifie que la salle correspond bien à une ROTUNDA.
+        - Récupère les deux portes actuellement actives depuis effects['active_doors'].
+        - Fait tourner cette paire d'une position dans le sens horaire
+          selon l'ordre [N, E, S, O].
+        - Met à jour effects['active_doors'] avec les nouvelles directions actives.
 
+    Args:
+        self (Room): instance de la salle courante.
 
-
-
-
+    Returns:
+        None: la méthode agit par effet de bord sur self.effects.
+    """
+        
+        if self.spec.key != "ROTUNDA":
+            return
+        dirs = [Orientation.N, Orientation.E, Orientation.S, Orientation.O]
+        active = self.effects.get("active_doors")
+        if not active:
+            return
+        pair = [Orientation(x) for x in active]
+        start_idx = (dirs.index(pair[0]) + 1) % 4
+        new_pair = (dirs[start_idx], dirs[(start_idx + 2) % 4])
+        self.effects["active_doors"] = [new_pair[0].value, new_pair[1].value]
 
