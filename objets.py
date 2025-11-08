@@ -1,37 +1,55 @@
 from abc import ABC, abstractmethod
 
-#_______________________le plan
 class objet(ABC):
-    #le plan de basse pour n'importe quelle objet dans le jeu 
-    def __init__(self, nom, description):
-        self.nom=nom
-        self.description= description
-
-    # la regle chaque objet enfants doit avoir une méthode utiliser 
+    """
+    Classe abstraite définit le plan de base pour les objets du jeu.
+    
+    Args:
+        nom (str): Le nom de l'objet
+        description (str): La description de l'objet
+        joueur: Le joueur qui utilise l'objet
+    """
+    def __init__(self, nom: str, description: str):
+        self.nom = nom
+        self.description = description
+    
     @abstractmethod
     def utiliser(self, joueur):
         pass
-#____________________________________
-# classes enfants (les objets concrets)
+
+# OBJETS PERMANENTS :
+
 class objetpermanent(objet):
-    #un objet que le joueur garde pour toujour elle herite de la classe objet 
-    def __init__(self,nom,description):
-        #on appelle le constructeur objet pour qu'il gere le nom et la description 
+    def __init__(self,nom : str, description : str):
         super().__init__(nom, description)
 
     def utiliser(self, joueur):
-        #on respecte les regles meme si l'action est simple 
         print(f"L'objet {self.nom} est un objet permanent")
 
+# OBJETS CONSOMMABLES :
+
 class objetconsommable(objet):
-    # un objet qui disparait aprés usage elle herite aussi de la classe objet 
-    def __init__(self,nom,description,valeur=1):
+    """
+    Objet qui disparaît après utilisation.
+    
+    Args:
+        valeur (int): La valeur ou quantité de l'objet
+    """
+    
+    def __init__(self,nom: str, description: str, valeur: int):
         super().__init__(nom, description)
-        # attribut spécifique aux consommable : leur "valuer" ou "quantité"
         self.valeur=valeur
     
+    
     def utiliser(self, joueur):
-        #la logique de consomation sera gérée par fares 
-        # la méthode doit exister 
-        print(f"le joueur utilise L'objet {self.nom}")
-
+        """
+        Utilise l'objet consommable. 
+        """       
+        print(f"Le joueur utilise L'objet {self.nom}")
+        
+        
+    def est_epuise(self):
+        """
+        Vérifie si l'objet est épuisé.
+        """
+        return self.valeur <= 0
