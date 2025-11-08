@@ -2,6 +2,8 @@
 import os, sys
 import pygame as pg
 from enum import Enum
+import random 
+from doors import Rooms, DoorState, Orientation, Room
 
 """ Grille Blue Prince """
 ROWS, COLS = 9, 5
@@ -463,10 +465,10 @@ def draw_sidebar(screen, font, big, inventory, room_label, icons):
 
 def opt_obj(name): 
 
-    """ Générer l'icône pour chaque objet, qu'il soit permanent ou temporaire 
+    """ Générer l'icône pour chaque objet, qu'il soit permanent ou temporaire. 
 
     Args:
-    name (str) : le nom du fichier de l'objet (example: "shovel.png")
+    name (str) : le nom du fichier de l'objet (example: "shovel.png").
         
     Returns:
     Renvoie un objet image (pygame.Surface) redimmensionné ou None si l'objet n'existe pas.
