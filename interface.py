@@ -2,6 +2,8 @@
 import os, sys
 import pygame as pg
 from enum import Enum
+import random 
+from doors import Rooms, DoorState, Orientation, Room
 
 """ Grille Blue Prince """
 ROWS, COLS = 9, 5
