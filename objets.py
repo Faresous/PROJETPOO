@@ -105,3 +105,60 @@ class objetconsommable(objet):
         """
         return self.valeur <= 0
 
+class objets_insolites(objet) :
+    """
+    Autres objets qui redonnent des pas
+    
+    Args:
+        valeur (int): La valeur ou quantité de l'objet
+    """
+    def __init__(self,nom: str, description: str, valeur: int):
+        super().__init__(nom, description)
+        self.valeur = valeur
+        
+    def utiliser(self, joueur):
+        if joueur.add_item("pas", self.valeur):
+            print(f"{joueur} a mangé {self.nom} et regagne + {self.valeur} pas!")
+            self.valeur = 0
+            return True
+        return False
+    
+class Pomme(objets_insolites):
+    """Redonne 2 pas"""
+    def __init__(self):
+        super().__init__(
+            nom="Pomme",
+            description="Redonne 2 pas",
+            valeur=2)
+     
+class Banane(objets_insolites):
+    """Redonne 3 pas"""
+    def __init__(self):
+        super().__init__(
+            nom="Banane",
+            description="Redonne 3 pas",
+            valeur=3) 
+        
+class Gateau(objets_insolites):
+    """Redonne 10 pas"""
+    def __init__(self):
+        super().__init__(
+            nom="Gateau",
+            description="Redonne 10 pas",
+            valeur=10)    
+        
+class Sandwich(objets_insolites):
+    """Redonne 15 pas"""
+    def __init__(self):
+        super().__init__(
+            nom="Sandwich",
+            description="Redonne 15 pas",
+            valeur=15)    
+        
+class Repas(objets_insolites):
+    """Redonne 25 pas"""
+    def __init__(self):
+        super().__init__(
+            nom="Repas",
+            description="Redonne 25 pas",
+            valeur=25)  
