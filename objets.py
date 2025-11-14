@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import random
 
 class objet(ABC):
     """
@@ -162,3 +163,67 @@ class Repas(objets_insolites):
             nom="Repas",
             description="Redonne 25 pas",
             valeur=25)  
+        
+class objets_interactifs(objet):
+    """
+    Classe pour les objets avec lesquels le joueur peut interagir
+    """
+    def __init__(self, nom: str, description: str):
+        super().__init__(nom, description)
+        self.deja_utilise = False # Pour savoir si l'objet a déjà été utilisé
+        
+    @abstractmethod
+    def utiliser(self, joueur):
+        pass
+    
+    
+class endroits_ou_creuser(objets_interactifs):
+    """
+    Un endroit où le joueur peut creuser en utilisant une pelle
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Endroit à creuser",
+            description="Endroit ou creuser nécessite une pelle contiennent différents objets consommables")
+
+    def utiliser(self, joueur):
+        
+        if self.deja_utilise:
+            print("Vous avez déjà creusé")
+            return False
+
+        if "Pelle" in joueur.objet_permanents:
+            print("Vous avez utilisez la Pelle pour déterrer quelque chose !")
+            
+            resultat = random.randint(1, 6) 
+            
+            if resultat == 1:
+                print("Vous déterrez 15 pièces d'or !")
+                joueur.add_item("orr", 15) 
+            
+            elif resultat == 2:
+                print("Vous déterrez 1 cle !")
+                joueur.add_item("cles", 1)   
+                 
+            elif resultat == 3:
+                print("Vous déterrez 5 pas !")
+                joueur.add_item("pas", 5) 
+                
+            elif resultat == 4:
+                print("Vous déterrez 1 gemme !")
+                joueur.add_item("gemmes", 1) 
+                
+            elif resultat == 5:
+                print("Vous déterrez 1 de !")
+                joueur.add_item("des", 1) 
+                
+            else: 
+                print("... mais vous ne trouvez rien :(")
+                
+                
+            self.deja_utilise = True
+            return True
+        
+        else:
+            print("Vous avez besoin d'une pelle pour creuser !")
+            return False
