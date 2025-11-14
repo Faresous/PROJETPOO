@@ -1,3 +1,5 @@
+from objets import Pelle, Marteau, Kit_de_crochetage, Detecteur_de_metaux, Patte_de_lapin
+
 class joueur:
     def __init__(self,ligne_depart,colonne_depart):
         # Position du joueur dans la grille 
@@ -53,7 +55,7 @@ class joueur:
             True si l'ajout a bien été fait, False sinon
         """
         
-        items = {'Pelle', 'Marteau', 'kit de crochetage', 'Detecteur de méteaux', 'Patte de lapin'}
+        items = {'Pelle', 'Marteau', 'Kit de crochetage', 'Detecteur de méteaux', 'Patte de lapin'}
         
         # Si la quatité est pas un entier ou si elle est négative : ERREUR !!
         if not isinstance(quantite, int) :
@@ -64,8 +66,23 @@ class joueur:
         # Objets permanants
         if item in items :
             if item not in self.objet_permanents:
-                self.objet_permanents[item] = True
+                if item == 'Pelle':
+                    self.objet_permanents[item] = Pelle()
+                    
+                elif item == 'Marteau':
+                    self.objet_permanents[item] = Marteau()
+                    
+                elif item == 'Kit de crochetage':
+                    self.objet_permanents[item] = Kit_de_crochetage()
+                    
+                elif item == 'Detecteur de méteaux':
+                    self.objet_permanents[item] = Detecteur_de_metaux()
+                    
+                elif item == 'Patte de lapin':
+                    self.objet_permanents[item] = Patte_de_lapin()
+                    
                 print(f"{item} a été ajouté aux objets permanents.")
+                
             else:
                 print(f"Vous possédez déjà {item}.")
             return True
@@ -80,12 +97,18 @@ class joueur:
             return False
         
     def synchroniser_inventaire(self, inventaire : dict):
-        #met a jour l'inventaire affiché dans la barre latérale a partir des valeurs réelles du joueur
+        # Met a jour l'inventaire affiché dans la barre latérale a partir des valeurs réelles du joueur
         inventaire["pas"]=self.pas #copie le nombre de pas du joueur vers l'UI
         inventaire["piéces"]=self.orr
         inventaire["gems"]=self.gemmes
         inventaire["clés"]=self.cles
         inventaire["dés"]=self.des   
+        
+        inventaire["pelle"] = 1 if "Pelle" in self.objet_permanents else 0
+        inventaire["marteau"] = 1 if "Marteau" in self.objet_permanents else 0
+        inventaire["kit de crochetage"] = 1 if "Kit de crochetage" in self.objet_permanents else 0
+        inventaire["detecteur de méteaux"] = 1 if "Detecteur de méteaux" in self.objet_permanents else 0
+        inventaire["patte de lapin"] = 1 if "Patte de lapin" in self.objet_permanents else 0
         
     def utiliser_objet(self, objet):
         """
