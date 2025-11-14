@@ -227,3 +227,74 @@ class endroits_ou_creuser(objets_interactifs):
         else:
             print("Vous avez besoin d'une pelle pour creuser !")
             return False
+        
+        
+class coffre(objets_interactifs):
+    """
+    Peut être ouvert avec un marteau ou une clé et donne des objets consommables
+    """
+    def __init__(self):
+        super().__init__(
+            nom="Coffre",
+            description="Un coffre verrouillé qui s'ouvre avec un marteau ou une clé."
+        )
+
+    def utiliser(self, joueur):
+        if self.deja_utilise:
+            print("Le coffre est déjà ouvert")
+            return False
+        
+        # On vérifie si le joueur a un Marteau
+        
+        if "Marteau" in joueur.objet_permanents:
+            print("Vous utilisez le marteau pour ouvrir le coffre")
+            
+            resultat = random.randint(1, 4)
+            
+            if resultat == 1:
+                print("Vous trouvez 25 pièces d'or !")
+                joueur.add_item("orr", 25) 
+                
+            elif resultat == 2:
+                print("Vous trouvez 10 pas !")
+                joueur.add_item("pas", 10) 
+                
+            elif resultat == 3:
+                print("Vous trouvez 1 gemmes !")
+                joueur.add_item("gemmes", 1)
+                 
+            else:
+                print("Vous trouvez 2 dés !")
+                joueur.add_item("des", 2)
+                
+            self.deja_utilise = True
+            return True
+            
+        # On vérifie si le joueur a une cle        
+        if joueur.cles > 0:
+            print("Vous utilisez une clé pour ouvrir le coffre")
+            joueur.cles -= 1    # On consomme une clé
+            
+            resultat = random.randint(1, 4)
+            
+            if resultat == 1:
+                print("Vous trouvez 25 pièces d'or !")
+                joueur.add_item("orr", 25) 
+                
+            elif resultat == 2:
+                print("Vous trouvez 10 pas !")
+                joueur.add_item("pas", 10) 
+                
+            elif resultat == 3:
+                print("Vous trouvez 1 gemmes !")
+                joueur.add_item("gemmes", 1)
+                 
+            else:
+                print("Vous trouvez 2 dés !")
+                joueur.add_item("des", 2)
+            self.deja_utilise = True
+            return True
+
+        print("Le coffre est verrouillé il vous faut une clé ou un marteau.")
+        return False
+    
