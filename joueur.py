@@ -64,7 +64,7 @@ class joueur:
         # Objets permanants
         if item in items :
             if item not in self.objet_permanents:
-                self.objet_permanents.append(item)
+                self.objet_permanents[item] = True
                 print(f"{item} a été ajouté aux objets permanents.")
             else:
                 print(f"Vous possédez déjà {item}.")
@@ -86,3 +86,9 @@ class joueur:
         inventaire["gems"]=self.gemmes
         inventaire["clés"]=self.cles
         inventaire["dés"]=self.des   
+        
+    def utiliser_objet(self, objet):
+        """
+        Méthode pour que le joueur utilise un objet de l'inventaire
+        """
+        return objet.utiliser(self)
