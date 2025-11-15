@@ -410,7 +410,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Unusual", cost_gems=1),
 
         "MUSIC_ROOM": RoomSpec(key="MUSIC_ROOM", name="Music Room",
-            desc="Feuilles de musique, 1 clé spéciale.", shape=RoomShape.SOUTH_OUEST_SHAPET,
+            desc="Feuilles de musique, 1 clé spéciale.", shape=RoomShape.SOUTH_OUEST_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard", cost_gems=2),
 
         "LOCKER_ROOM": RoomSpec(key="LOCKER_ROOM", name="Locker Room",
