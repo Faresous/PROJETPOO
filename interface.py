@@ -1,8 +1,6 @@
-# ============================================================
-#  interface.py – Version BluePrince complète (Option B validée)
-#  Déplacement strict par portes, draft, reroll, loot, salle active.
-#  Menu principal conservé, musique conservée.
-# ============================================================
+# ===================================
+#  interface.py – Version BluePrince 
+# ===================================
 
 import os
 import sys
@@ -60,9 +58,8 @@ class UIState(Enum):
     OPTIONS  = 3
     QUITTING = 4
 
-
 # ============================================================
-#  MENU PRINCIPAL (inchangé)
+#  MENU PRINCIPAL (docstrings originales)
 # ============================================================
 
 WHITE = (255, 255, 255)
@@ -70,7 +67,18 @@ ACCENT = (28, 160, 110)
 ACCENT_DARK = (20, 120, 85)
 
 def _button_rects(center_x, start_y, w = 360, h = 56, gap = 16):
-    """ Création des boutons du menu principal. """
+    """ Création des boutons du menu principal en forme de rectangle  
+
+    Args:
+        center_x (int): coordonnée du centre du rectangle par rapport à x 
+        start_y (int): hauteur du rectangle de chaque bouton (sa coordonnée y) 
+        w (int): la largeur du rectangle 
+        h (int): la hauteur du rectangle
+        gap (int): l'espace entre chaque bouton
+
+    Returns:
+        Renvoie une liste qui crée le rectangle correspondant à chaque bouton 
+    """
     rects = []
     y = start_y
     for _ in range(4):
@@ -79,28 +87,38 @@ def _button_rects(center_x, start_y, w = 360, h = 56, gap = 16):
     return rects
 
 def draw_main_menu(screen, big, font, bg_img, focus_idx):
-    """ Dessine le menu principal. """
+    """ Dessine le menu principal avec les boutons  
+
+    Args:
+        screen (pg.Surface): écran de jeu
+        big (pg.font.Font): agrandir la police pour les titres 
+        font (pg.font.Font): la police d'écriture  
+        bg_img (pg.Surface): écran de fond
+        focus_idx (int): index du bouton de la position actuelle
+
+    Returns:
+        Renvoie l'affichage du menu principal avec une liste de rectangles correspondant à chaque bouton 
+    """
     screen.fill(BG1)
     if bg_img:
         bg = pg.transform.smoothscale(bg_img, (screen.get_width(), screen.get_height()))
-        screen.blit(bg, (0,0))
+        screen.blit(bg, (0, 0))
         dark = pg.Surface(screen.get_size(), pg.SRCALPHA)
-        dark.fill((0,0,0,70))
-        screen.blit(dark, (0,0))
+        dark.fill((0, 0, 0, 70))
+        screen.blit(dark, (0, 0))
 
     cx = screen.get_width() // 2
     title = big.render("BluePrince", True, TEXT_DARK)
     subtitle = font.render("Choisissez une action", True, MUTED)
-
-    screen.blit(title, title.get_rect(center=(cx,140)))
-    screen.blit(subtitle, subtitle.get_rect(center=(cx,190)))
+    screen.blit(title, title.get_rect(center=(cx, 140)))
+    screen.blit(subtitle, subtitle.get_rect(center=(cx, 190)))
 
     rects = _button_rects(center_x=cx, start_y=260)
     labels = ["Nouvelle partie", "Charger", "Options", "Quitter"]
 
     mx, my = pg.mouse.get_pos()
     for i, (r, label) in enumerate(zip(rects, labels)):
-        hovered = r.collidepoint(mx,my) or (i == focus_idx)
+        hovered = r.collidepoint(mx, my) or (i == focus_idx)
         draw_pill_button(screen, r, hovered)
         txt = font.render(label, True, ACCENT_DARK if hovered else TEXT_DARK)
         screen.blit(txt, txt.get_rect(center=r.center))
@@ -108,23 +126,44 @@ def draw_main_menu(screen, big, font, bg_img, focus_idx):
     return rects
 
 def draw_pill_button(screen, rect, hovered):
-    """ Bouton arrondi. """
+    """
+    Dessine un bouton de type "bulle" (bordure arrondie).
+
+    Args:
+        screen (pg.Surface): Surface principale sur laquelle le bouton est affiché.
+        rect (pg.Rect): Rectangle définissant la position et la taille du bouton.
+        hovered (bool): Indique si le bouton est survolé par la souris (active un effet visuel plus lumineux au niveau des bordures).
+
+    Returns:
+        Dessine directement sur la surface du bouton donnée.
+    """
     sh = pg.Surface((rect.w, rect.h), pg.SRCALPHA)
-    pg.draw.rect(sh, (0,0,0,60), (0,0,rect.w,rect.h), border_radius=rect.h//2)
-    screen.blit(sh, (rect.x, rect.y+4))
-
+    pg.draw.rect(sh, (0, 0, 0, 60), (0, 0, rect.w, rect.h), border_radius=rect.h // 2)
+    screen.blit(sh, (rect.x, rect.y + 4))
+    
     btn = pg.Surface((rect.w, rect.h), pg.SRCALPHA)
-    pg.draw.rect(btn, (255,255,255,240 if hovered else 220),
-                 (0,0,rect.w,rect.h), border_radius=rect.h//2)
+    pg.draw.rect(btn, (255, 255, 255, 240 if hovered else 220),
+                 (0, 0, rect.w, rect.h), border_radius=rect.h // 2)
 
-    pg.draw.rect(btn, ACCENT if hovered else (220,226,231),
-                 (0,0,rect.w,rect.h), width=2, border_radius=rect.h//2)
+    pg.draw.rect(btn, ACCENT if hovered else (220, 226, 231),
+                 (0, 0, rect.w, rect.h), width=2, border_radius=rect.h // 2)
     screen.blit(btn, rect.topleft)
 
+
 def run_main_menu(screen, big, font, clock, assets_dir):
-    """ Boucle du menu principal. """
+    """
+    Affiche et gère le menu principal du jeu.
+
+    Cette fonction crée la boucle d'événements du menu d'accueil. 
+    Elle affiche le fond, les boutons (Nouvelle partie, Charger, Options, Quitter),
+    et gère la navigation via le clavier et la souris. 
+    Lorsqu'une option est sélectionnée, elle renvoie l'état correspondant du jeu.
+
+    Returns:
+        UIState: l'état du jeu choisi dans le menu.
+    """
     bg_img = None
-    for nm in ("BG_blueprince.webp","BG_blueprince.png","BG_blueprince.jpg"):
+    for nm in ("BG_blueprince.webp", "BG_blueprince.png", "BG_blueprince.jpg"):
         p = os.path.join(assets_dir, nm)
         if os.path.exists(p):
             bg_img = pg.image.load(p).convert()
@@ -132,39 +171,33 @@ def run_main_menu(screen, big, font, clock, assets_dir):
 
     labels = ["Nouvelle partie", "Charger", "Options", "Quitter"]
     actions = [UIState.PLAYING, "LOAD", UIState.OPTIONS, UIState.QUITTING]
-
     focus_idx = 0
 
     while True:
-        for e in pg.event.get():
-
-            if e.type == pg.QUIT:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
                 return UIState.QUITTING
-
-            if e.type == pg.KEYDOWN:
-                if e.key == pg.K_ESCAPE:
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
                     return UIState.QUITTING
-                elif e.key in (pg.K_UP, pg.K_z):
+                elif event.key in (pg.K_UP, pg.K_z):
                     focus_idx = (focus_idx - 1) % len(labels)
-                elif e.key in (pg.K_DOWN, pg.K_s):
+                elif event.key in (pg.K_DOWN, pg.K_s):
                     focus_idx = (focus_idx + 1) % len(labels)
-                elif e.key in (pg.K_RETURN, pg.K_SPACE):
+                elif event.key in (pg.K_RETURN, pg.K_SPACE):
                     act = actions[focus_idx]
                     return act if isinstance(act, UIState) else UIState.MENU
 
-            if e.type == pg.MOUSEMOTION:
-                rects = _button_rects(center_x=screen.get_width()//2,
-                                      start_y=260)
+            if event.type == pg.MOUSEMOTION:
+                rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
                 for i, r in enumerate(rects):
-                    if r.collidepoint(e.pos):
+                    if r.collidepoint(event.pos):
                         focus_idx = i
                         break
-
-            if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
-                rects = _button_rects(center_x=screen.get_width()//2,
-                                      start_y=260)
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
                 for i, r in enumerate(rects):
-                    if r.collidepoint(e.pos):
+                    if r.collidepoint(event.pos):
                         act = actions[i]
                         return act if isinstance(act, UIState) else UIState.MENU
 
@@ -172,49 +205,54 @@ def run_main_menu(screen, big, font, clock, assets_dir):
         pg.display.flip()
         clock.tick(FPS)
 
+
 def _run_options(screen, font, big, clock):
-    """ Écran options. """
+    """
+    Affiche et gère la section "options" (3ème bouton dans le menu principal).
+
+    Returns:
+        UIState: état de sortie de l'écran options.
+    """
     running = True
     while running:
         for e in pg.event.get():
-            if e.type == pg.QUIT: running = False
+            if e.type == pg.QUIT:
+                running = False
             if e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
                 running = False
             if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
                 running = False
 
-        screen.fill((240,244,248))
-        screen.blit(big.render("Options", True, TEXT_DARK), (40,40))
-        screen.blit(font.render("Paramètres à implémenter...", True, MUTED), (40,110))
+        screen.fill((240, 244, 248))
+        screen.blit(big.render("Options", True, TEXT_DARK), (40, 40))
+        screen.blit(font.render("Je pense à implementer la langue, peut-être une jauge d'audio, luminosité...", True, MUTED), (40, 110))
         pg.display.flip()
         clock.tick(FPS)
 
-
 # ============================================================
-#  MUSIQUE + CHARGEMENT D’IMAGES
+#  MUSIQUE + IMAGES
 # ============================================================
 
 def init_music():
-    """ Initialise la musique de fond. """
+    """ Music de fond du jeu BluePrince """
     pg.mixer.init()
-    pg.mixer.music.load(os.path.join(ASSETS,"blueprince.mp3"))
+    pg.mixer.music.load(os.path.join(ASSETS, "blueprince.mp3"))
     pg.mixer.music.set_volume(1)
     pg.mixer.music.play(-1)
 
 def load_png(name, size):
-    """ Charge et redimensionne une icône PNG. """
+    """ Chargement des icons des objets """
     path = os.path.join(ASSETS, name)
     surf = pg.image.load(path).convert_alpha()
     return pg.transform.smoothscale(surf, (size, size))
 
 def opt_obj(name):
-    """ Charge une icône si elle existe. """
+    """ Générer l'icône pour chaque objet. """
     p = os.path.join(ASSETS, name)
     return load_png(name, INV_ICON) if os.path.exists(p) else None
 
-
 # ============================================================
-#  TIRAGE DE 3 SALLES POUR LE DRAFT
+#  TIRAGE DE 3 SALLES
 # ============================================================
 
 def draft_three_rooms(row: int):
@@ -237,14 +275,12 @@ def draft_three_rooms(row: int):
 
     return out
 
-
 def reroll_draft(row: int, player: joueur, draft_list):
     """ Reroll du draft si joueur possède un dé. """
     if player.des <= 0:
         return draft_list, False
     player.des -= 1
     return draft_three_rooms(row), True
-
 
 def apply_room_loot(player: joueur, room: Room):
     """ Applique effets immédiats : gemmes, pas, malus. """
@@ -268,60 +304,69 @@ def apply_room_loot(player: joueur, room: Room):
 
     return None
 
-
-# ============================================================
-#  AFFICHAGE PLATEAU
-# ============================================================
-
-def grid_rect(r, c):
-    """ Rectangle d’une cellule graphique. """
-    x = PAD + c * (CELL + GAP)
-    y = PAD + r * (CELL + GAP)
-    return pg.Rect(x, y, CELL, CELL)
-
+# =================================
+#  DESSIN DU TRIANGLE DIRECTIONNEL 
+# =================================
 
 def draw_direction_hint(screen, rect, direction: Orientation):
     """
-    Dessine un triangle blanc propre sur le bord de la salle pour indiquer
-    la direction sélectionnée par le joueur.
+    Dessine un triangle blanc (indicateur directionnel) sur le bord de la salle
+    pour indiquer la direction sélectionnée par le joueur (ZQSD/flèches).
+    Cette fonction est nouvelle, donc docstring ajoutée (A2).
     """
+    SIZE = 6
 
     if direction == Orientation.N:
         pts = [
             (rect.centerx, rect.top + 5),
-            (rect.centerx - 12, rect.top + 25),
-            (rect.centerx + 12, rect.top + 25)
+            (rect.centerx - SIZE, rect.top + 25),
+            (rect.centerx + SIZE, rect.top + 25)
         ]
 
     elif direction == Orientation.S:
         pts = [
             (rect.centerx, rect.bottom - 5),
-            (rect.centerx - 12, rect.bottom - 25),
-            (rect.centerx + 12, rect.bottom - 25)
+            (rect.centerx - SIZE, rect.bottom - 25),
+            (rect.centerx + SIZE, rect.bottom - 25)
         ]
 
     elif direction == Orientation.E:
         pts = [
             (rect.right - 5, rect.centery),
-            (rect.right - 25, rect.centery - 12),
-            (rect.right - 25, rect.centery + 12)
+            (rect.right - 25, rect.centery - SIZE),
+            (rect.right - 25, rect.centery + SIZE)
         ]
 
     elif direction == Orientation.O:
         pts = [
             (rect.left + 5, rect.centery),
-            (rect.left + 25, rect.centery - 12),
-            (rect.left + 25, rect.centery + 12)
+            (rect.left + 25, rect.centery - SIZE),
+            (rect.left + 25, rect.centery + SIZE)
         ]
 
-    pg.draw.polygon(screen, WHITE, pts)
+    pg.draw.polygon(screen, (255, 255, 255), pts)
+    pg.draw.polygon(screen, (0, 0, 0), pts, width=2)
 
+# =====================
+#  DESSIN DE LA GRILLE
+# =====================
 
-
+def grid_rect(r, c):
+    """ Dimmensionnement du plateau du jeu """
+    x = PAD + c * (CELL + GAP)
+    y = PAD + r * (CELL + GAP)
+    return pg.Rect(x, y, CELL, CELL)
 
 def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_direction):
-    """
-    Affiche la grille du manoir + salle active + triangle directionnel.
+    """ Construire le plateau de jeu à gauche de l'écran 
+
+    Args:
+        screen (pygame.surface): Fond ert formes des grilles   
+        room_grid (list[list[Room|None]]): Grille contenant les salles explorées
+        player (joueur): position actuelle du joueur
+        img_entree: image de l’entrée
+        img_anti: image de l’anti-chambre
+        active_direction (Orientation|None): direction sélectionnée pour déplacement
     """
     screen.fill(BG2, pg.Rect(0,0,BOARD_W,H))
 
@@ -347,38 +392,47 @@ def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_d
                 if room:
                     pg.draw.rect(screen, ROOM_COL, rect, border_radius=8)
 
-            # --- 2) CONTORNER LA SALLE ACTIVE
+            # --- 2) SALLE ACTIVE (contour)
             if (r,c) == (player.ligne, player.colonne):
                 pg.draw.rect(screen, WHITE, rect, width=3, border_radius=10)
 
-                # --- 3) TRIANGLE DIRECTIONNEL PAR-DESSUS TOUT
+                # --- 3) TRIANGLE DIREC. AU-DESSUS DE TOUT
                 if active_direction:
                     draw_direction_hint(screen, rect, active_direction)
 
-
-# ============================================================
-#  SIDEBAR (INVENTAIRE + MESSAGE)
-# ============================================================
+# =======================
+#  SIDEBAR / INVENTAIRE 
+# =======================
 
 def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, last_message):
-    """ Affiche l'inventaire réel du joueur. """
+    """ Construire l'inventaire à droite de l'écran 
+
+    Args:
+        screen (pygame.surface): Fond et formes des grilles  
+        font (pygame.font): La police d'écriture 
+        big (pygame.font.Font): Agrandir la police pour les titres
+        player (joueur): instance contenant l’inventaire et ressources
+        current_room_name (str): nom de la salle actuelle
+        icons (dict[str,Surface]): icônes disponibles
+        last_message (str): message (loot, erreur...)
+    """
     x0 = BOARD_W
     screen.fill(BG1, pg.Rect(x0,0,SIDEBAR_W,H))
 
     screen.blit(big.render("Inventory:", True, TEXT_DARK), (x0+24,24))
 
-    # Inventaire réel
+    # Inventaire réel basé sur joueur.py
     inventory = {
-        "pas": player.pas,
-        "pièces": player.orr,
-        "gems": player.gemmes,
-        "clés": player.cles,
-        "dés": player.des,
-        "pelle": 1 if "Pelle" in player.objet_permanents else 0,
-        "detecteur de méteaux": 1 if "Detecteur de méteaux" in player.objet_permanents else 0,
-        "patte de lapin": 1 if "Patte de lapin" in player.objet_permanents else 0,
-        "kit de crochetage": 1 if "Kit de crochetage" in player.objet_permanents else 0,
-        "marteau": 1 if "Marteau" in player.objet_permanents else 0,
+        "pas": joueur.pas,
+        "pièces": joueur.orr,
+        "gems": joueur.gemmes,
+        "clés": joueur.cles,
+        "dés": joueur.des,
+        "pelle": 1 if "Pelle" in joueur.objet_permanents else 0,
+        "detecteur de méteaux": 1 if "Detecteur de méteaux" in joueur.objet_permanents else 0,
+        "patte de lapin": 1 if "Patte de lapin" in joueur.objet_permanents else 0,
+        "kit de crochetage": 1 if "Kit de crochetage" in joueur.objet_permanents else 0,
+        "marteau": 1 if "Marteau" in joueur.objet_permanents else 0,
     }
 
     permanents = [
@@ -394,7 +448,7 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
 
     colL = x0+24
     colR = x0+SIDEBAR_W//2+20
-    dxL = dxR = INV_ICON + 10
+    dx = INV_ICON + 10
     valdx = 120
 
     screen.blit(font.render("Permanents", True, MUTED), (colL,56))
@@ -405,7 +459,7 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
         if inventory[key] > 0:
             ico = icons.get(key)
             if ico: screen.blit(ico, (colL,yL))
-            screen.blit(font.render(label,True,TEXT_DARK),(colL+dxL,yL+6))
+            screen.blit(font.render(label,True,TEXT_DARK),(colL+dx,yL+6))
             screen.blit(big.render(str(inventory[key]),True,TEXT_DARK),(colL+valdx,yL+2))
             yL += INV_ICON + 24
 
@@ -413,7 +467,7 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
     for key,label in conso:
         ico = icons.get(key)
         if ico: screen.blit(pg.transform.smoothscale(ico,(INV_ICON,INV_ICON)),(colR,yR+4))
-        screen.blit(font.render(label,True,TEXT_DARK),(colR+dxR,yR+6))
+        screen.blit(font.render(label,True,TEXT_DARK),(colR+dx,yR+6))
         screen.blit(big.render(str(inventory[key]),True,TEXT_DARK),(colR+valdx,yR+2))
         yR += INV_ICON + 24
 
@@ -423,9 +477,8 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
     if last_message:
         screen.blit(font.render(last_message, True, (0,0,0)), (x0+24, H-40))
 
-
 # ============================================================
-#  AFFICHAGE DU DRAFT DE SALLES
+#  DRAFT (docstrings originales)
 # ============================================================
 
 def draw_draft(screen, font, big, draft_list, focus_idx):
@@ -446,23 +499,21 @@ def draw_draft(screen, font, big, draft_list, focus_idx):
     rr = big.render("Redraw (R)", True, (60,60,60))
     screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 300)))
 
-
 # ============================================================
-#  MAIN
+#  MAIN (docstring originale)
 # ============================================================
 
 def main():
+    """ main (test) """
 
     pg.init()
     init_music()
     screen = pg.display.set_mode((W,H))
-    pg.display.set_caption("Blue Prince – Prototype complet")
-
+    pg.display.set_caption("Blue Prince — Jeux + Inventaire")
     clock = pg.time.Clock()
     font = pg.font.SysFont(None,24)
     big  = pg.font.SysFont(None,28)
 
-    # icônes
     icon = CELL - 8
     img_entree = load_png("entree.webp", icon) if os.path.exists(ASSETS) else None
     img_anti   = load_png("antichambre.webp", icon) if os.path.exists(ASSETS) else None
@@ -497,6 +548,7 @@ def main():
     # ============================================================
     #            BOUCLE PRINCIPALE
     # ============================================================
+
     running = True
     while running:
 
@@ -514,7 +566,6 @@ def main():
                 continue
             if choice == UIState.QUITTING:
                 break
-
 
         # -------------------------
         # ÉTAT : PLAYING
@@ -598,13 +649,21 @@ def main():
                         last_message = msg
                         active_direction = None
 
+            # --- SÉCURITÉ : si salle = None → attendre draft
+            if room_grid[player.ligne][player.colonne] is None:
+                pg.display.flip()
+                clock.tick(FPS)
+                continue
+
             # Rendu PLAYING
             draw_board(screen, room_grid, player, img_entree, img_anti, active_direction)
-            name = room_grid[player.ligne][player.colonne].spec.name
+            
+            current_room = room_grid[player.ligne][player.colonne]
+            name = current_room.spec.name if current_room else "Unknown room"
+
             draw_sidebar(screen, font, big, player, name, icons, last_message)
             pg.display.flip()
             clock.tick(FPS)
-
 
         # -------------------------
         # ÉTAT : DRAFT
@@ -640,7 +699,6 @@ def main():
             draw_draft(screen, font, big, draft_list, focus_idx)
             pg.display.flip()
             clock.tick(FPS)
-
 
         # -------------------------
         # ÉTAT : QUITTING
