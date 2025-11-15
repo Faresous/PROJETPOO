@@ -70,7 +70,7 @@ class Door:
     rarity: Rarity
     state: DoorState
 
-    def open(self, inventory: set[str]) -> bool:
+    def open(self, resources: dict) -> bool:
         """
         Ouvre la porte en appliquant la règle:
           - UNLOCKED (niv 0): gratuit.
