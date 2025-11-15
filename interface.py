@@ -459,15 +459,35 @@ def draw_draft(screen, font, big, draft_list, focus_idx):
     title = big.render("Choose a room to draft", True, TEXT_DARK)
     screen.blit(title, (x0+80,40))
 
-    xs = [x0+60, x0+200, x0+340]
+    xs = [x0+90, x0+220, x0+350]   # positions horizontales des 3 rooms
+    img_size = 80                # taille des images des salles
 
-    for i,spec in enumerate(draft_list):
+    for i, spec in enumerate(draft_list):
+
+        # IMAGE DE LA SALLE
+        img = ROOM_IMAGES.get(spec.key)
+        if img:
+            # redimensionner proprement
+            room_img = pg.transform.smoothscale(img, (img_size, img_size))
+            screen.blit(room_img, room_img.get_rect(center=(xs[i], 170)))
+        else:
+            # fallback sans image
+            pg.draw.rect(screen, (200,200,200),
+                         pg.Rect(xs[i]-img_size//2, 170-img_size//2, img_size, img_size))
+
+        # NOM EN DESSOUS DE L’IMAGE
         col = (0,120,255) if i==focus_idx else TEXT_DARK
         txt = font.render(spec.name, True, col)
-        screen.blit(txt, txt.get_rect(center=(xs[i], 180)))
+        screen.blit(txt, txt.get_rect(center=(xs[i], 270)))
+
+        # CADRE BLEU SI SÉLECTIONNÉ
+        if i == focus_idx:
+            rect = pg.Rect(xs[i]-img_size//2, 170-img_size//2, img_size, img_size)
+            pg.draw.rect(screen, (0,120,255), rect, width=3, border_radius=8)
 
     rr = big.render("Redraw (R)", True, (60,60,60))
-    screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 300)))
+    screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 340)))
+
 
 # ===========
 #  GAME OVER
