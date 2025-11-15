@@ -658,10 +658,17 @@ def main():
                         if dir == Orientation.O: dep_colonne = -1
          
                         # perte de 1 pas
-                        player.move(dep_ligne, dep_colonne)
-                        step_flash = "-1"
-                        step_flash_time = 1.0
-
+                        try:
+                            player.move(dep_ligne, dep_colonne)
+                            step_flash = "-1"
+                            step_flash_time = 1.0
+                            
+                        except ValueError:
+                            last_message = "Plus de pas !"
+                            state = UIState.GAME_OVER
+                            active_direction = None
+                            continue
+                        
                         if player.pas <= 0:
                             state = UIState.GAME_OVER
                             continue
