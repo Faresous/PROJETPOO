@@ -645,14 +645,15 @@ def main():
                             active_direction = None
                             continue
 
-                        new_r, new_c = r, c
-                        if dir == Orientation.N: new_r -= 1
-                        if dir == Orientation.S: new_r += 1
-                        if dir == Orientation.E: new_c += 1
-                        if dir == Orientation.O: new_c -= 1
-
-                        # -1 pas
-                        player.pas -= 1
+                        dep_ligne, dep_colonne = 0, 0
+                        
+                        if dir == Orientation.N: dep_ligne = -1 
+                        if dir == Orientation.S: dep_ligne = 1
+                        if dir == Orientation.E: dep_colonne = 1
+                        if dir == Orientation.O: dep_colonne = -1
+         
+                        # perte de 1 pas
+                        player.move(dep_ligne, dep_colonne)
                         step_flash = "-1"
                         step_flash_time = 1.0
 
@@ -661,17 +662,15 @@ def main():
                             continue
 
                         # nouvelle salle
-                        if room_grid[new_r][new_c] is None:
-                            player.ligne, player.colonne = new_r, new_c
-                            draft_list = draft_three_rooms(new_r)
+                        if room_grid[player.ligne][player.colonne] is None:
+                            draft_list = draft_three_rooms(player.ligne)
                             focus_idx = 0
                             active_direction = None
                             state = UIState.DRAFT
                             continue
 
                         # salle connue
-                        player.ligne, player.colonne = new_r, new_c
-                        msg = apply_room_loot(player, room_grid[new_r][new_c])
+                        msg = apply_room_loot(player, room_grid[player.ligne][player.colonne])
 
                         if msg and msg.startswith("You gain"):
                             gain = int(msg.split()[2])
