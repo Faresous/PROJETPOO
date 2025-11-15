@@ -39,6 +39,29 @@ BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
 
 # ============================================================
+#  AJOUT : dictionnaire global contenant les images des salles
+# ============================================================
+ROOM_IMAGES = {}
+
+def load_room_images():
+    """
+    Charge les images des salles (.webp ou .png) selon Rooms.ROOMS_DB.
+    """
+    for key in Rooms.ROOMS_DB.keys():
+
+        img = None
+        # On teste .webp puis .png
+        for ext in ("webp", "png"):
+            filename = f"{key}.{ext}"
+            path = os.path.join(ASSETS, filename)
+            if os.path.exists(path):
+                img = load_png(filename, CELL - 8)
+                break
+
+        ROOM_IMAGES[key] = img
+
+
+# ============================================================
 #  ÉTATS DE L’INTERFACE
 # ============================================================
 
@@ -69,18 +92,7 @@ ACCENT = (28, 160, 110)
 ACCENT_DARK = (20, 120, 85)
 
 def _button_rects(center_x, start_y, w = 360, h = 56, gap = 16):
-    """ Création des boutons du menu principal en forme de rectangle  
-
-    Args:
-        center_x (int): coordonnée du centre du rectangle par rapport à x 
-        start_y (int): hauteur du rectangle de chaque bouton (sa coordonnée y) 
-        w (int): la largeur du rectangle 
-        h (int): la hauteur du rectangle
-        gap (int): l'espace entre chaque bouton
-
-    Returns:
-        Renvoie une liste qui crée le rectangle correspondant à chaque bouton 
-    """
+    """ Création des boutons du menu principal en forme de rectangle  """
     rects = []
     y = start_y
     for _ in range(4):
@@ -89,18 +101,7 @@ def _button_rects(center_x, start_y, w = 360, h = 56, gap = 16):
     return rects
 
 def draw_main_menu(screen, big, font, bg_img, focus_idx):
-    """ Dessine le menu principal avec les boutons  
-
-    Args:
-        screen (pg.Surface): écran de jeu
-        big (pg.font.Font): agrandir la police pour les titres 
-        font (pg.font.Font): la police d'écriture  
-        bg_img (pg.Surface): écran de fond
-        focus_idx (int): index du bouton de la position actuelle
-
-    Returns:
-        Renvoie l'affichage du menu principal avec une liste de rectangles correspondant à chaque bouton 
-    """
+    """ Dessine le menu principal avec les boutons  """
     screen.fill(BG1)
     if bg_img:
         bg = pg.transform.smoothscale(bg_img, (screen.get_width(), screen.get_height()))
@@ -127,22 +128,15 @@ def draw_main_menu(screen, big, font, bg_img, focus_idx):
 
     return rects
 
+
 def draw_pill_button(screen, rect, hovered):
     """
     Dessine un bouton de type "bulle" (bordure arrondie).
-
-    Args:
-        screen (pg.Surface): Surface principale sur laquelle le bouton est affiché.
-        rect (pg.Rect): Rectangle définissant la position et la taille du bouton.
-        hovered (bool): Indique si le bouton est survolé par la souris (active un effet visuel plus lumineux au niveau des bordures).
-
-    Returns:
-        Dessine directement sur la surface du bouton donnée.
     """
     sh = pg.Surface((rect.w, rect.h), pg.SRCALPHA)
     pg.draw.rect(sh, (0, 0, 0, 60), (0, 0, rect.w, rect.h), border_radius=rect.h // 2)
     screen.blit(sh, (rect.x, rect.y + 4))
-    
+
     btn = pg.Surface((rect.w, rect.h), pg.SRCALPHA)
     pg.draw.rect(btn, (255, 255, 255, 240 if hovered else 220),
                  (0, 0, rect.w, rect.h), border_radius=rect.h // 2)
@@ -155,14 +149,6 @@ def draw_pill_button(screen, rect, hovered):
 def run_main_menu(screen, big, font, clock, assets_dir):
     """
     Affiche et gère le menu principal du jeu.
-
-    Cette fonction crée la boucle d'événements du menu d'accueil. 
-    Elle affiche le fond, les boutons (Nouvelle partie, Charger, Options, Quitter),
-    et gère la navigation via le clavier et la souris. 
-    Lorsqu'une option est sélectionnée, elle renvoie l'état correspondant du jeu.
-
-    Returns:
-        UIState: l'état du jeu choisi dans le menu.
     """
     bg_img = None
     for nm in ("BG_blueprince.webp", "BG_blueprince.png", "BG_blueprince.jpg"):
@@ -179,6 +165,7 @@ def run_main_menu(screen, big, font, clock, assets_dir):
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return UIState.QUITTING
+
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     return UIState.QUITTING
@@ -196,6 +183,7 @@ def run_main_menu(screen, big, font, clock, assets_dir):
                     if r.collidepoint(event.pos):
                         focus_idx = i
                         break
+
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
                 for i, r in enumerate(rects):
@@ -210,7 +198,7 @@ def run_main_menu(screen, big, font, clock, assets_dir):
 
 def _run_options(screen, font, big, clock):
     """
-    Affiche et gère la section "options" (3ème bouton dans le menu principal).
+    Affiche et gère la section "options".
     """
     running = True
     while running:
@@ -319,38 +307,30 @@ def draw_direction_hint(screen, rect, direction: Orientation):
     SIZE = 20
 
     if direction == Orientation.N:
-        pts = [
-            (rect.centerx, rect.top + 5),
-            (rect.centerx - SIZE, rect.top + 25),
-            (rect.centerx + SIZE, rect.top + 25)
-        ]
+        pts = [(rect.centerx, rect.top + 5),
+               (rect.centerx - SIZE, rect.top + 25),
+               (rect.centerx + SIZE, rect.top + 25)]
 
     elif direction == Orientation.S:
-        pts = [
-            (rect.centerx, rect.bottom - 5),
-            (rect.centerx - SIZE, rect.bottom - 25),
-            (rect.centerx + SIZE, rect.bottom - 25)
-        ]
+        pts = [(rect.centerx, rect.bottom - 5),
+               (rect.centerx - SIZE, rect.bottom - 25),
+               (rect.centerx + SIZE, rect.bottom - 25)]
 
     elif direction == Orientation.E:
-        pts = [
-            (rect.right - 5, rect.centery),
-            (rect.right - 25, rect.centery - SIZE),
-            (rect.right - 25, rect.centery + SIZE)
-        ]
+        pts = [(rect.right - 5, rect.centery),
+               (rect.right - 25, rect.centery - SIZE),
+               (rect.right - 25, rect.centery + SIZE)]
 
     elif direction == Orientation.O:
-        pts = [
-            (rect.left + 5, rect.centery),
-            (rect.left + 25, rect.centery - SIZE),
-            (rect.left + 25, rect.centery + SIZE)
-        ]
+        pts = [(rect.left + 5, rect.centery),
+               (rect.left + 25, rect.centery - SIZE),
+               (rect.left + 25, rect.centery + SIZE)]
 
     pg.draw.polygon(screen, (255,255,255), pts)
     pg.draw.polygon(screen, (0,0,0), pts, width=2)
 
 # ============================================================
-#  DESSIN DE LA GRILLE
+#  DESSIN DE LA GRILLE — MODIFIÉ (images de salles ajoutées)
 # ============================================================
 
 def grid_rect(r, c):
@@ -360,16 +340,7 @@ def grid_rect(r, c):
     return pg.Rect(x, y, CELL, CELL)
 
 def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_direction):
-    """ Construire le plateau de jeu à gauche de l'écran 
-
-    Args:
-        screen (pygame.surface): Fond ert formes des grilles   
-        room_grid (list[list[Room|None]]): Grille contenant les salles explorées
-        player (joueur): position actuelle du joueur
-        img_entree: image de l’entrée
-        img_anti: image de l’anti-chambre
-        active_direction (Orientation|None): direction sélectionnée pour déplacement
-    """
+    """ Construire le plateau de jeu à gauche de l'écran  """
     screen.fill(BG2, pg.Rect(0,0,BOARD_W,H))
 
     for r in range(ROWS):
@@ -377,12 +348,14 @@ def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_d
             rect = grid_rect(r,c)
             room = room_grid[r][c]
 
+            # entrée
             if (r,c) == ENTRY_POS:
                 if img_entree:
                     screen.blit(img_entree, img_entree.get_rect(center=rect.center))
                 else:
                     pg.draw.rect(screen, (90,200,255), rect, border_radius=10)
 
+            # anti-chambre
             elif (r,c) == ANTI_POS:
                 if img_anti:
                     screen.blit(img_anti, img_anti.get_rect(center=rect.center))
@@ -391,31 +364,25 @@ def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_d
 
             else:
                 if room:
-                    pg.draw.rect(screen, ROOM_COL, rect, border_radius=8)
+                    # AJOUT : afficher l'image de la salle si disponible
+                    img = ROOM_IMAGES.get(room.spec.key)
+                    if img:
+                        screen.blit(img, img.get_rect(center=rect.center))
+                    else:
+                        pg.draw.rect(screen, ROOM_COL, rect, border_radius=8)
 
+            # salle active
             if (r,c) == (player.ligne, player.colonne):
                 pg.draw.rect(screen, WHITE, rect, width=3, border_radius=10)
-
                 if active_direction:
                     draw_direction_hint(screen, rect, active_direction)
+
 # ======================
 #  SIDEBAR / INVENTAIRE 
 # ======================
 
 def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, last_message, step_flash, step_flash_time):
-    """ Construire l'inventaire à droite de l'écran 
-
-    Args:
-        screen (pygame.surface): Fond et formes des grilles  
-        font (pygame.font): La police d'écriture 
-        big (pygame.font.Font): Agrandir la police pour les titres
-        player (joueur): instance contenant l’inventaire et ressources
-        current_room_name (str): nom de la salle actuelle
-        icons (dict[str,Surface]): icônes disponibles
-        last_message (str): message (loot, erreur...)
-        step_flash (str): texte +1 / -1 à afficher
-        step_flash_time (float): temps restant
-    """
+    """ Construire l'inventaire à droite de l'écran  """
     x0 = BOARD_W
     screen.fill(BG1, pg.Rect(x0,0,SIDEBAR_W,H))
 
@@ -531,6 +498,9 @@ def main():
     font = pg.font.SysFont(None,24)
     big  = pg.font.SysFont(None,28)
 
+    # AJOUT : chargement images des salles
+    load_room_images()
+
     icon = CELL - 8
     img_entree = load_png("entree.webp", icon) if os.path.exists(ASSETS) else None
     img_anti   = load_png("antichambre.webp", icon) if os.path.exists(ASSETS) else None
@@ -566,7 +536,7 @@ def main():
     running = True
     while running:
 
-        # GAME OVER
+        # ------------ GAME OVER ----------------
         if state == UIState.GAME_OVER:
             draw_game_over(screen, font, big)
             pg.display.flip()
@@ -581,7 +551,7 @@ def main():
             clock.tick(FPS)
             continue
 
-        # MENU
+        # ------------ MENU ----------------
         if state == UIState.MENU:
             choice = run_main_menu(screen, big, font, clock, ASSETS)
             if choice == UIState.PLAYING:
@@ -594,7 +564,7 @@ def main():
             if choice == UIState.QUITTING:
                 break
 
-        # PLAYING
+        # ------------ PLAYING ----------------
         if state == UIState.PLAYING:
 
             if step_flash_time > 0:
@@ -627,6 +597,7 @@ def main():
                         room = room_grid[r][c]
                         dir  = active_direction
 
+                        # bords
                         if (dir==Orientation.N and r==0) \
                         or (dir==Orientation.S and r==ROWS-1) \
                         or (dir==Orientation.E and c==COLS-1) \
@@ -653,17 +624,15 @@ def main():
                             last_message = "The door is locked."
                             active_direction = None
                             continue
-                        
-                        new_r, new_c = r, c    
-                        dep_ligne, dep_colonne = 0, 0
-                        
-                        if dir == Orientation.N: dep_ligne = -1 
-                        if dir == Orientation.S: dep_ligne = 1
-                        if dir == Orientation.E: dep_colonne = 1
-                        if dir == Orientation.O: dep_colonne = -1
-         
-                        # perte de 1 pas
-                        player.move(dep_ligne, dep_colonne)
+
+                        new_r, new_c = r, c
+                        if dir == Orientation.N: new_r -= 1
+                        if dir == Orientation.S: new_r += 1
+                        if dir == Orientation.E: new_c += 1
+                        if dir == Orientation.O: new_c -= 1
+
+                        # -1 pas
+                        player.pas -= 1
                         step_flash = "-1"
                         step_flash_time = 1.0
 
@@ -671,16 +640,18 @@ def main():
                             state = UIState.GAME_OVER
                             continue
 
-                        # Nouvelle salle ?
-                        if room_grid[player.ligne][player.colonne] is None:
-                            draft_list = draft_three_rooms(player.ligne)
+                        # nouvelle salle
+                        if room_grid[new_r][new_c] is None:
+                            player.ligne, player.colonne = new_r, new_c
+                            draft_list = draft_three_rooms(new_r)
                             focus_idx = 0
                             active_direction = None
                             state = UIState.DRAFT
                             continue
 
-                        # Salle connue
-                        msg = apply_room_loot(player, room_grid[player.ligne][player.colonne])
+                        # salle connue
+                        player.ligne, player.colonne = new_r, new_c
+                        msg = apply_room_loot(player, room_grid[new_r][new_c])
 
                         if msg and msg.startswith("You gain"):
                             gain = int(msg.split()[2])
@@ -704,7 +675,7 @@ def main():
             pg.display.flip()
             clock.tick(FPS)
 
-        # DRAFT 
+        # ------------ DRAFT ----------------
         if state == UIState.DRAFT:
 
             for e in pg.event.get():
