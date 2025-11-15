@@ -700,7 +700,7 @@ def main():
             pg.display.flip()
             clock.tick(FPS)
 
-        # DRAFT for new room
+        # DRAFT 
         if state == UIState.DRAFT:
 
             for e in pg.event.get():
