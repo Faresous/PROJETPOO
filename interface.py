@@ -1,6 +1,6 @@
-# ===================================
-#  interface.py – Version BluePrince 
-# ===================================
+# =====================================================
+#  interface.py – Interface graphique du jeu BluePrince
+# =====================================================
 
 import os
 import sys
@@ -10,9 +10,9 @@ from enum import Enum
 from doors import Rooms, Doors, Orientation, Room
 from joueur import joueur
 
-# ============================================================
+# ======================
 #  CONSTANTES GÉNÉRALES
-# ============================================================
+# ======================
 
 ROWS, COLS = 9, 5
 CELL, GAP, PAD = 64, 4, 40
@@ -51,16 +51,18 @@ class UIState(Enum):
     - DRAFT : écran de sélection de 3 salles.
     - OPTIONS : paramètres.
     - QUITTING : sortie du jeu.
+    - GAME_OVER : plus de pas.
     """
     MENU     = 0
     PLAYING  = 1
     DRAFT    = 2
     OPTIONS  = 3
     QUITTING = 4
+    GAME_OVER = 5
 
-# ============================================================
-#  MENU PRINCIPAL (docstrings originales)
-# ============================================================
+# ===============
+#  MENU PRINCIPAL 
+# ===============
 
 WHITE = (255, 255, 255)
 ACCENT = (28, 160, 110)
@@ -209,9 +211,6 @@ def run_main_menu(screen, big, font, clock, assets_dir):
 def _run_options(screen, font, big, clock):
     """
     Affiche et gère la section "options" (3ème bouton dans le menu principal).
-
-    Returns:
-        UIState: état de sortie de l'écran options.
     """
     running = True
     while running:
@@ -223,20 +222,20 @@ def _run_options(screen, font, big, clock):
             if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
                 running = False
 
-        screen.fill((240, 244, 248))
-        screen.blit(big.render("Options", True, TEXT_DARK), (40, 40))
-        screen.blit(font.render("Je pense à implementer la langue, peut-être une jauge d'audio, luminosité...", True, MUTED), (40, 110))
+        screen.fill((240,244,248))
+        screen.blit(big.render("Options", True, TEXT_DARK), (40,40))
+        screen.blit(font.render("Paramètres à implémenter...", True, MUTED), (40,110))
         pg.display.flip()
         clock.tick(FPS)
 
-# ============================================================
+# ==================
 #  MUSIQUE + IMAGES
-# ============================================================
+# ==================
 
 def init_music():
     """ Music de fond du jeu BluePrince """
     pg.mixer.init()
-    pg.mixer.music.load(os.path.join(ASSETS, "blueprince.mp3"))
+    pg.mixer.music.load(os.path.join(ASSETS,"blueprince.mp3"))
     pg.mixer.music.set_volume(1)
     pg.mixer.music.play(-1)
 
@@ -251,9 +250,9 @@ def opt_obj(name):
     p = os.path.join(ASSETS, name)
     return load_png(name, INV_ICON) if os.path.exists(p) else None
 
-# ============================================================
+# ====================
 #  TIRAGE DE 3 SALLES
-# ============================================================
+# ====================
 
 def draft_three_rooms(row: int):
     """ Tire trois salles compatibles avec la rareté. """
@@ -304,17 +303,16 @@ def apply_room_loot(player: joueur, room: Room):
 
     return None
 
-# =================================
-#  DESSIN DU TRIANGLE DIRECTIONNEL 
-# =================================
+# =======================
+#  TRIANGLE DIRECTIONNEL
+# =======================
 
 def draw_direction_hint(screen, rect, direction: Orientation):
     """
-    Dessine un triangle blanc (indicateur directionnel) sur le bord de la salle
-    pour indiquer la direction sélectionnée par le joueur (ZQSD/flèches).
-    Cette fonction est nouvelle, donc docstring ajoutée (A2).
+    Dessine un triangle blanc propre sur le bord de la salle pour indiquer
+    la direction sélectionnée par le joueur.
     """
-    SIZE = 6
+    SIZE = 20
 
     if direction == Orientation.N:
         pts = [
@@ -344,12 +342,12 @@ def draw_direction_hint(screen, rect, direction: Orientation):
             (rect.left + 25, rect.centery + SIZE)
         ]
 
-    pg.draw.polygon(screen, (255, 255, 255), pts)
-    pg.draw.polygon(screen, (0, 0, 0), pts, width=2)
+    pg.draw.polygon(screen, (255,255,255), pts)
+    pg.draw.polygon(screen, (0,0,0), pts, width=2)
 
-# =====================
+# ============================================================
 #  DESSIN DE LA GRILLE
-# =====================
+# ============================================================
 
 def grid_rect(r, c):
     """ Dimmensionnement du plateau du jeu """
@@ -375,7 +373,6 @@ def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_d
             rect = grid_rect(r,c)
             room = room_grid[r][c]
 
-            # --- 1) DESSIN DE LA SALLE (IMAGE OU RECTANGLE)
             if (r,c) == ENTRY_POS:
                 if img_entree:
                     screen.blit(img_entree, img_entree.get_rect(center=rect.center))
@@ -392,19 +389,16 @@ def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_d
                 if room:
                     pg.draw.rect(screen, ROOM_COL, rect, border_radius=8)
 
-            # --- 2) SALLE ACTIVE (contour)
             if (r,c) == (player.ligne, player.colonne):
                 pg.draw.rect(screen, WHITE, rect, width=3, border_radius=10)
 
-                # --- 3) TRIANGLE DIREC. AU-DESSUS DE TOUT
                 if active_direction:
                     draw_direction_hint(screen, rect, active_direction)
-
-# =======================
+# ======================
 #  SIDEBAR / INVENTAIRE 
-# =======================
+# ======================
 
-def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, last_message):
+def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, last_message, step_flash, step_flash_time):
     """ Construire l'inventaire à droite de l'écran 
 
     Args:
@@ -415,24 +409,25 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
         current_room_name (str): nom de la salle actuelle
         icons (dict[str,Surface]): icônes disponibles
         last_message (str): message (loot, erreur...)
+        step_flash (str): texte +1 / -1 à afficher
+        step_flash_time (float): temps restant
     """
     x0 = BOARD_W
     screen.fill(BG1, pg.Rect(x0,0,SIDEBAR_W,H))
 
     screen.blit(big.render("Inventory:", True, TEXT_DARK), (x0+24,24))
 
-    # Inventaire réel basé sur joueur.py
     inventory = {
-        "pas": joueur.pas,
-        "pièces": joueur.orr,
-        "gems": joueur.gemmes,
-        "clés": joueur.cles,
-        "dés": joueur.des,
-        "pelle": 1 if "Pelle" in joueur.objet_permanents else 0,
-        "detecteur de méteaux": 1 if "Detecteur de méteaux" in joueur.objet_permanents else 0,
-        "patte de lapin": 1 if "Patte de lapin" in joueur.objet_permanents else 0,
-        "kit de crochetage": 1 if "Kit de crochetage" in joueur.objet_permanents else 0,
-        "marteau": 1 if "Marteau" in joueur.objet_permanents else 0,
+        "pas": player.pas,
+        "pièces": player.orr,
+        "gems": player.gemmes,
+        "clés": player.cles,
+        "dés": player.des,
+        "pelle": 1 if "Pelle" in player.objet_permanents else 0,
+        "detecteur de méteaux": 1 if "Detecteur de méteaux" in player.objet_permanents else 0,
+        "patte de lapin": 1 if "Patte de lapin" in player.objet_permanents else 0,
+        "kit de crochetage": 1 if "Kit de crochetage" in player.objet_permanents else 0,
+        "marteau": 1 if "Marteau" in player.objet_permanents else 0,
     }
 
     permanents = [
@@ -474,12 +469,16 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
     yb = max(yL,yR) + 12
     screen.blit(big.render(current_room_name, True, TEXT_DARK),(x0+24,yb))
 
+    if step_flash and step_flash_time > 0:
+        color = (0,180,0) if step_flash.startswith("+") else (220,40,40)
+        screen.blit(big.render(step_flash, True, color), (x0+24, yb+40))
+
     if last_message:
         screen.blit(font.render(last_message, True, (0,0,0)), (x0+24, H-40))
 
-# ============================================================
-#  DRAFT (docstrings originales)
-# ============================================================
+# =======
+#  DRAFT
+# =======
 
 def draw_draft(screen, font, big, draft_list, focus_idx):
     """ Affiche les 3 salles à sélectionner. """
@@ -499,9 +498,23 @@ def draw_draft(screen, font, big, draft_list, focus_idx):
     rr = big.render("Redraw (R)", True, (60,60,60))
     screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 300)))
 
-# ============================================================
-#  MAIN (docstring originale)
-# ============================================================
+# ===========
+#  GAME OVER
+# ===========
+
+def draw_game_over(screen, font, big):
+    """
+    Affiche l'écran Game Over lorsque le joueur n'a plus de pas.
+    """
+    screen.fill((0,0,0))
+    txt = big.render("NO STEPS LEFT", True, (255,60,60))
+    sub = font.render("GAME OVER — Press SPACE to return to menu", True, (220,220,220))
+    screen.blit(txt, txt.get_rect(center=(W//2, H//2 - 20)))
+    screen.blit(sub, sub.get_rect(center=(W//2, H//2 + 20)))
+
+# ======
+#  MAIN
+# ======
 
 def main():
     """ main (test) """
@@ -531,30 +544,40 @@ def main():
         "dés": opt_obj("dice.png"),
     }
 
-    # ---- joueur + grille des salles ----
     player = joueur(ENTRY_POS[0], ENTRY_POS[1])
 
     room_grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
     room_grid[ENTRY_POS[0]][ENTRY_POS[1]] = Rooms.generate_room("ENTRANCE_HALL", row=ENTRY_POS[0])
     room_grid[ANTI_POS[0]][ANTI_POS[1]]   = Rooms.generate_room("ANTECHAMBER",   row=0)
 
-    # états
     state = UIState.MENU
     active_direction = None
     last_message = None
     draft_list = None
     focus_idx = 0
 
-    # ============================================================
-    #            BOUCLE PRINCIPALE
-    # ============================================================
+    step_flash = None
+    step_flash_time = 0
 
     running = True
     while running:
 
-        # -------------------------
-        # ÉTAT : MENU
-        # -------------------------
+        # GAME OVER
+        if state == UIState.GAME_OVER:
+            draw_game_over(screen, font, big)
+            pg.display.flip()
+
+            for e in pg.event.get():
+                if e.type == pg.QUIT:
+                    return 0
+                if e.type == pg.KEYDOWN and e.key in (pg.K_SPACE, pg.K_RETURN):
+                    state = UIState.MENU
+                    continue
+
+            clock.tick(FPS)
+            continue
+
+        # MENU
         if state == UIState.MENU:
             choice = run_main_menu(screen, big, font, clock, ASSETS)
             if choice == UIState.PLAYING:
@@ -567,10 +590,13 @@ def main():
             if choice == UIState.QUITTING:
                 break
 
-        # -------------------------
-        # ÉTAT : PLAYING
-        # -------------------------
+        # PLAYING
         if state == UIState.PLAYING:
+
+            if step_flash_time > 0:
+                step_flash_time -= 1 / FPS
+            else:
+                step_flash = None
 
             for e in pg.event.get():
 
@@ -597,7 +623,6 @@ def main():
                         room = room_grid[r][c]
                         dir  = active_direction
 
-                        # Bords du manoir
                         if (dir==Orientation.N and r==0) \
                         or (dir==Orientation.S and r==ROWS-1) \
                         or (dir==Orientation.E and c==COLS-1) \
@@ -606,14 +631,12 @@ def main():
                             active_direction = None
                             continue
 
-                        # Porte présente ?
                         door = room.doors.get(dir)
                         if door is None:
                             last_message = "No door in this direction."
                             active_direction = None
                             continue
 
-                        # Tentative d’ouverture
                         resources = {
                             "keys": player.cles,
                             "kit de crochetage": ("Kit de crochetage" in player.objet_permanents)
@@ -627,14 +650,22 @@ def main():
                             active_direction = None
                             continue
 
-                        # nouvelle position
                         new_r, new_c = r, c
                         if dir == Orientation.N: new_r -= 1
                         if dir == Orientation.S: new_r += 1
                         if dir == Orientation.E: new_c += 1
                         if dir == Orientation.O: new_c -= 1
 
-                        # Salle inconnue ?
+                        # perte de 1 pas
+                        player.pas -= 1
+                        step_flash = "-1"
+                        step_flash_time = 1.0
+
+                        if player.pas <= 0:
+                            state = UIState.GAME_OVER
+                            continue
+
+                        # Nouvelle salle ?
                         if room_grid[new_r][new_c] is None:
                             player.ligne, player.colonne = new_r, new_c
                             draft_list = draft_three_rooms(new_r)
@@ -643,31 +674,33 @@ def main():
                             state = UIState.DRAFT
                             continue
 
-                        # Salle connue → loot éventuellement
+                        # Salle connue
                         player.ligne, player.colonne = new_r, new_c
                         msg = apply_room_loot(player, room_grid[new_r][new_c])
+
+                        if msg and msg.startswith("You gain"):
+                            gain = int(msg.split()[2])
+                            step_flash = f"+{gain}"
+                            step_flash_time = 1.0
+
                         last_message = msg
                         active_direction = None
 
-            # --- SÉCURITÉ : si salle = None → attendre draft
             if room_grid[player.ligne][player.colonne] is None:
                 pg.display.flip()
                 clock.tick(FPS)
                 continue
 
-            # Rendu PLAYING
             draw_board(screen, room_grid, player, img_entree, img_anti, active_direction)
             
             current_room = room_grid[player.ligne][player.colonne]
             name = current_room.spec.name if current_room else "Unknown room"
 
-            draw_sidebar(screen, font, big, player, name, icons, last_message)
+            draw_sidebar(screen, font, big, player, name, icons, last_message, step_flash, step_flash_time)
             pg.display.flip()
             clock.tick(FPS)
 
-        # -------------------------
-        # ÉTAT : DRAFT
-        # -------------------------
+        # DRAFT
         if state == UIState.DRAFT:
 
             for e in pg.event.get():
@@ -692,7 +725,14 @@ def main():
                         spec = draft_list[focus_idx]
                         room = Rooms.generate_room(spec.key, row=player.ligne)
                         room_grid[player.ligne][player.colonne] = room
-                        last_message = apply_room_loot(player, room)
+
+                        msg = apply_room_loot(player, room)
+                        if msg and msg.startswith("You gain"):
+                            gain = int(msg.split()[2])
+                            step_flash = f"+{gain}"
+                            step_flash_time = 1.0
+
+                        last_message = msg
                         state = UIState.PLAYING
 
             draw_board(screen, room_grid, player, img_entree, img_anti, None)
@@ -700,9 +740,6 @@ def main():
             pg.display.flip()
             clock.tick(FPS)
 
-        # -------------------------
-        # ÉTAT : QUITTING
-        # -------------------------
         if state == UIState.QUITTING:
             running = False
 
