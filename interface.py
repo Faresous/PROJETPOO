@@ -295,6 +295,80 @@ def apply_room_loot(player: joueur, room: Room):
 
     return None
 
+def room_has_opening(spec, orientation):
+    """Retourne True si la salle possède une porte dans l'orientation demandée."""
+    dirs = Doors.shape_orientations(spec.shape)
+    return orientation in dirs
+
+def allowed_room_positions(spec, new_r, new_c):
+    """Filtre géographique : vérifie que la salle peut exister à la position."""
+    dirs = Doors.shape_orientations(spec.shape)
+
+    # bord du haut → pas de porte Nord
+    if new_r == 0 and Orientation.N in dirs:
+        return False
+
+    # bord du bas
+    if new_r == ROWS - 1 and Orientation.S in dirs:
+        return False
+
+    # bord gauche
+    if new_c == 0 and Orientation.O in dirs:
+        return False
+
+    # bord droit
+    if new_c == COLS - 1 and Orientation.E in dirs:
+        return False
+
+    return True
+
+ROTATION_ORDER = [Orientation.N, Orientation.E, Orientation.S, Orientation.O]
+def rotate_shape_to_fit(spec, entrance_dir):
+    """
+    Retourne une nouvelle RoomSpec avec rotation effectuée
+    pour que la porte 'entrance_dir' devienne accessible.
+    """
+    needed = entrance_dir
+
+    for rot in range(4):
+        dirs = Doors.shape_orientations(spec.shape)
+        if needed in dirs:
+            return spec, rot
+        spec = spec.rotate_90()  # ta classe RoomSpec le permet déjà
+
+    # si aucune rotation ne marche → salle impossible
+    return None, None
+
+def compute_valid_specs(row, col, entrance_dir):
+    """
+    Filtre complet : rareté + compatibilité géographique + rotation auto
+    """
+    specs = list(Rooms.ROOMS_DB.values())
+    rng = random.Random()
+    rng.seed()
+
+    valid = []
+
+    for spec in specs:
+
+        # 1) La salle doit posséder l'ouverture du côté par lequel on entre
+        if not room_has_opening(spec, Orientation.opposite(entrance_dir)):
+            continue
+
+        # 2) Géométrie : interdictions selon la position dans le manoir
+        if not allowed_room_positions(spec, row, col):
+            continue
+
+        # 3) Tester rotations possibles
+        rotated, rot = rotate_shape_to_fit(spec, entrance_dir)
+        if rotated is None:
+            continue
+
+        valid.append(rotated)
+
+    return valid
+
+
 # =======================
 #  TRIANGLE DIRECTIONNEL
 # =======================
