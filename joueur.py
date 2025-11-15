@@ -43,6 +43,7 @@ class joueur:
             self.gemmes -= nb_gems
             print(f"Le joueur a depense {nb_gems} gemmes !")  
             return True
+        print(f"Pas assez de gemmes !")  
         return False
     
     def add_item(self, item, quantite):
