@@ -320,7 +320,8 @@ class Doors:
         out: Dict[Orientation, Door] = {}
         for d in dirs:
             r = Rarity(Doors.level_by_row(row, rng=rng))
-            out[d] = Door(rarity=r, state=Doors.default_state_from_rarity(r))
+            out[d] = Door(rarity=r, state=DoorState.UNLOCKED)
+            
         return out
 
 
