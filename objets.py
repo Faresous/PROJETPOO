@@ -298,3 +298,55 @@ class coffre(objets_interactifs):
         print("Le coffre est verrouillé il vous faut une clé ou un marteau.")
         return False
     
+class casier(objets_interactifs) :
+    """
+    Un casier qui s'ouvre avec une clé et qui donne des objets consommables ou rien
+    """
+    
+    def __init__(self):
+        super().__init__(
+            nom="Casier",
+            description="Un casier qui s'ouvre avec une clé.")
+    
+    def utiliser(self, joueur):
+        if self.deja_utilise:
+            print("Le casier est déja ouvert")
+            return False
+        
+        # On vérifie si le joueur a une Clé
+        if joueur.cles > 0: 
+            
+            print("Vous utilisez une clé pour ouvrir le casier")
+            
+            joueur.cles -= 1 # On consomme la clé
+            
+            resultat = random.randint(1, 4)
+            
+            if resultat == 1:
+                print("Vous trouvez 5 pièces d'or !")
+                joueur.add_item("orr", 5)
+                
+            elif resultat == 2:
+                print("Vous trouvez 1 dé !")
+                joueur.add_item("des", 1)
+                
+            elif resultat == 3:
+                print("Vous retrouvez 1 clé !")
+                joueur.add_item("cles", 1)
+                
+            elif resultat == 4:
+                print("Vous trouvez 10 pas !")
+                joueur.add_item("pas", 10) 
+                
+            elif resultat == 5:
+                print("Vous trouvez 1 gemmes !")
+                joueur.add_item("gemmes", 1)
+                
+            else:
+                print("Le casier est vide :(")
+                
+            self.deja_utilise = True
+            return True
+
+        print("Ce casier nécessite une clé pour l'ouvrir")
+        return False
