@@ -41,7 +41,7 @@ class joueur:
         
         if self.gemmes >= nb_gems : 
             self.gemmes -= nb_gems
-            print(f"Le joueur a dépensé {nb_gems} gemmes !")  
+            print(f"Le joueur a depense {nb_gems} gemmes !")  
             return True
         return False
     

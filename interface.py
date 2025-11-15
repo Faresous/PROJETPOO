@@ -616,7 +616,12 @@ def main():
                         r, c = player.ligne, player.colonne
                         room = room_grid[r][c]
                         dir  = active_direction
-
+                        
+                        if room is None:
+                            last_message = "No room here."
+                            active_direction = None
+                            continue
+                        
                         # bords
                         if (dir==Orientation.N and r==0) \
                         or (dir==Orientation.S and r==ROWS-1) \
@@ -669,7 +674,7 @@ def main():
                             state = UIState.DRAFT
                             continue
 
-                        # salle connue
+                        # salle connuet
                         msg = apply_room_loot(player, room_grid[player.ligne][player.colonne])
 
                         if msg and msg.startswith("You gain"):
@@ -679,7 +684,7 @@ def main():
 
                         last_message = msg
                         active_direction = None
-
+            
             if room_grid[player.ligne][player.colonne] is None:
                 pg.display.flip()
                 clock.tick(FPS)
@@ -693,7 +698,7 @@ def main():
             draw_sidebar(screen, font, big, player, name, icons, last_message, step_flash, step_flash_time)
             pg.display.flip()
             clock.tick(FPS)
-
+  
         # ------------ DRAFT ----------------
         if state == UIState.DRAFT:
 
@@ -717,6 +722,12 @@ def main():
 
                     elif e.key in (pg.K_SPACE, pg.K_RETURN):
                         spec = draft_list[focus_idx]
+                        cost = spec.cost_gems or 0
+                        
+                        if not player.utiliser_gems(cost):
+                            last_message = "Pas assez de gems!"
+                            continue
+                        
                         room = Rooms.generate_room(spec.key, row=player.ligne)
                         room_grid[player.ligne][player.colonne] = room
 
