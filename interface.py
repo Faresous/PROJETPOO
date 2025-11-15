@@ -256,7 +256,9 @@ def opt_obj(name):
 
 def draft_three_rooms(row: int):
     """ Tire trois salles compatibles avec la rareté. """
-    specs = list(Rooms.ROOMS_DB.values())
+    specs = [
+        spec for key, spec in Rooms.ROOMS_DB.items()
+        if key not in {"ROOM_46", "ANTECHAMBER"}]
     out = []
 
     for _ in range(3):
@@ -270,6 +272,8 @@ def draft_three_rooms(row: int):
             rare_ok = ("Rumored","Epic","Very Rare","Rare")
 
         pool = [s for s in specs if s.rarity_label in rare_ok]
+        if not pool:
+            pool = specs
         out.append(random.choice(pool))
 
     return out
