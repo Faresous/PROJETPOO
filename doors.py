@@ -649,19 +649,22 @@ class Rooms:
         
         # bedrooms 
         "BEDROOM": RoomSpec(key="BEDROOM", name="Bedroom", desc="Whenever you enter this room, gain 2 steps.",
-            shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
+            shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common",
+            effects={"regain_steps": 2},),
 
         "BOUDOIR": RoomSpec(key="BOUDOIR", name="Boudoir", desc="Classic boudoir room.",
             shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET, tags=("bedroom", "boudoir"), rarity_label="Standard"),
 
         "GUEST_BEDROOM": RoomSpec(key="GUEST_BEDROOM", name="Guest Bedroom", desc="+10 steps when entering this room.",
-            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common",
+            effects={"regain_steps": 10}),
 
         "NURSERY": RoomSpec(key="NURSERY", name="Nursery", desc="Whenever you draft a Bedroom, gain 5 steps.",
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common",cost_gems=1),
 
         "SERVANTS_QUARTERS": RoomSpec(key="SERVANTS_QUARTERS", name="Servant's Quarters", desc="+1 step for each Bedroom in your house.",
-            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Unusual", cost_gems=1),
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Unusual", cost_gems=1,
+            effects={"regain_steps_per_bedroom": 1}),
 
         "BUNK_ROOM": RoomSpec(key="BUNK_ROOM", name="Bunk Room", desc="Counts as 2 Bedrooms.", shape=RoomShape.DEAD_END,
             color=RoomColor.VIOLET, tags=("bedroom","double"), rarity_label="Unusual"),
@@ -670,7 +673,8 @@ class Rooms:
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","boost"), rarity_label="Rare"),
 
         "MASTER_BEDROOM": RoomSpec(key="MASTER_BEDROOM", name="Master Bedroom", desc="+1 step for each room in your house.",
-            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Rare", cost_gems=2),
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Rare", cost_gems=2,
+            effects={"regain_steps_per_room": 1},),
         
         #Green Rooms 
         "TERRACE": RoomSpec(
@@ -864,7 +868,7 @@ class Rooms:
             shape=RoomShape.T_SHAPE,
             color=RoomColor.RED,
             rarity_label="Common",
-            #effects={"penalty": {"steps_minus": 1}}
+            effects={"penalty_steps": 1},
         ),
 
         "MAIDS_CHAMBER": RoomSpec(
@@ -892,7 +896,7 @@ class Rooms:
             shape=RoomShape.T_SHAPE,
             color=RoomColor.RED,
             rarity_label="Standard",
-            #effects={"penalty": {"steps_minus": 2}}
+            effects={"penalty_steps": 2},
         ),
 
         "DARKROOM": RoomSpec(
@@ -911,7 +915,7 @@ class Rooms:
             shape=RoomShape.FOUR_WAY,
             color=RoomColor.RED,
             rarity_label="Rare",
-            #effects={"penalty": {"steps_minus_half": True}}
+            effects={"penalty_half": True},
         ),
 
         "FURNACE": RoomSpec(

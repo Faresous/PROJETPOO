@@ -385,32 +385,57 @@ def reroll_draft(row: int, col: int, player: joueur, draft_list,pioche: list, en
     player.des -= 1
     return draft_three_rooms(row, col, entrance_dir, pioche), True
 
-def apply_room_loot(player: joueur, room: Room):
-    """ Applique effets immédiats : gemmes, pas, or, malus. """
+def apply_room_loot(player: joueur, room: Room, room_grid):
+    """
+    Applique les effets immédiats : pas, pièces, gemmes, malus.
+    """
     eff = room.effects
+    if not eff:
+        return None
 
+    # --- Gains simples de pas ---
     if "regain_steps" in eff:
         g = eff["regain_steps"]
         player.pas += g
         return f"You gain {g} step(s)."
 
-    if "garden" in eff:
-        g = eff["garden"]["gems_spawn"]
-        if g > 0:
-            player.gemmes += g
-            return f"You gain {g} gem(s)."
+    # --- Pertes simples ---
+    if "penalty_steps" in eff:
+        p = eff["penalty_steps"]
+        player.pas -= p
+        return f"You lose {p} step(s)."
 
-    if "penalty" in eff:
-        s = eff["penalty"]["steps_minus"]
-        player.pas -= s
-        return f"You lose {s} step(s)."
+    # --- Perte de la moitié ---
+    if eff.get("penalty_half"):
+        lost = player.pas // 2
+        player.pas -= lost
+        return f"You lose {lost} step(s)."
 
+    # --- +1 pas par salle dans la maison ---
+    if "regain_steps_per_room" in eff:
+        total = sum(1 for row in room_grid for r in row if r)
+        g = total * eff["regain_steps_per_room"]
+        player.pas += g
+        return f"You gain {g} step(s) from Master Bedroom."
+
+    # --- +1 pas par chambre (Bedroom) ---
+    if "regain_steps_per_bedroom" in eff:
+        total = sum(
+            1 for row in room_grid for r in row
+            if r and "bedroom" in r.spec.tags
+        )
+        g = total * eff["regain_steps_per_bedroom"]
+        player.pas += g
+        return f"You gain {g} step(s) from Servant's Quarters."
+
+    # --- Vault / pièces ---
     if "loot_coins" in eff:
         coins = eff["loot_coins"]
         player.add_item("orr", coins)
         return f"You gain {coins} coin(s)."
 
     return None
+
 
 
 def room_has_opening(spec, orientation):
@@ -1037,7 +1062,7 @@ def main():
                             continue
 
                         # salle connuet
-                        msg = apply_room_loot(player, room_grid[player.ligne][player.colonne])
+                        msg = apply_room_loot(player, room_grid[player.ligne][player.colonne],room_grid)
 
                         if msg and msg.startswith("You gain"):
                             gain = int(msg.split()[2])
@@ -1102,7 +1127,7 @@ def main():
                         if return_door:
                             return_door.state = DoorState.UNLOCKED
                             
-                        msg = apply_room_loot(player, room)
+                        msg = apply_room_loot(player, room, room_grid)
                         if msg and msg.startswith("You gain"):
                             gain = int(msg.split()[2])
                             step_flash = f"+{gain}"
