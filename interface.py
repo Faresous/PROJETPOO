@@ -315,7 +315,7 @@ def get_opposite_dir(dir: Orientation):
     if dir == Orientation.O: return Orientation.E
     return None
 
-def draft_three_rooms(row: int, entrance_direction: Orientation , pioche: list):
+def draft_three_rooms(row: int, col: int, entrance_direction: Orientation , pioche: list):
     """ Tire trois salles compatibles avec la rareté. """
     
     needed_door = get_opposite_dir(entrance_direction)
@@ -327,12 +327,16 @@ def draft_three_rooms(row: int, entrance_direction: Orientation , pioche: list):
             
         # On teste les 4 rotations
         for rotation in [0, 90, 180, 270]:
-            # Calcule les portes pour cette rotation
             room_doors = Doors.shape_orientations(spec.shape, rotation)
             
-            if needed_door in room_doors:
-                valid_options.append( (spec, rotation) )
-                break
+            if needed_door not in room_doors:
+                continue 
+
+            if not allowed_room_positions(spec, row, col, rotation):
+                continue 
+            
+            valid_options.append( (spec, rotation) )
+            break
             
     lvl = Doors.level_by_row(row)
     if lvl == 0:
@@ -348,12 +352,12 @@ def draft_three_rooms(row: int, entrance_direction: Orientation , pioche: list):
     else:
         return random.sample(pool, 3)
 
-def reroll_draft(row: int, player: joueur, draft_list,pioche: list, entrance_dir: Orientation):
+def reroll_draft(row: int, col: int, player: joueur, draft_list,pioche: list, entrance_dir: Orientation):
     """ Reroll du draft si joueur possède un dé. """
     if player.des <= 0:
         return draft_list, False
     player.des -= 1
-    return draft_three_rooms(row, entrance_dir, pioche), True
+    return draft_three_rooms(row, col, entrance_dir, pioche), True
 
 def apply_room_loot(player: joueur, room: Room):
     """ Applique effets immédiats : gemmes, pas, malus. """
@@ -382,9 +386,9 @@ def room_has_opening(spec, orientation):
     dirs = Doors.shape_orientations(spec.shape)
     return orientation in dirs
 
-def allowed_room_positions(spec, new_r, new_c):
+def allowed_room_positions(spec, new_r, new_c,rotation):
     """Filtre géographique : vérifie que la salle peut exister à la position."""
-    dirs = Doors.shape_orientations(spec.shape)
+    dirs = Doors.shape_orientations(spec.shape, rotation)
 
     # bord du haut → pas de porte Nord
     if new_r == 0 and Orientation.N in dirs:
@@ -404,7 +408,7 @@ def allowed_room_positions(spec, new_r, new_c):
 
     return True
 
-ROTATION_ORDER = [Orientation.N, Orientation.E, Orientation.S, Orientation.O]
+
 def rotate_shape_to_fit(spec, entrance_dir):
     """
     Retourne une nouvelle RoomSpec avec rotation effectuée
@@ -963,7 +967,7 @@ def main():
                         # nouvelle salle
                         if room_grid[player.ligne][player.colonne] is None:
                             entrance_direction_for_draft = active_direction
-                            draft_list = draft_three_rooms(player.ligne, entrance_direction_for_draft, pioche)
+                            draft_list = draft_three_rooms(player.ligne, player.colonne, entrance_direction_for_draft, pioche)
                             focus_idx = 0
                             active_direction = None
                             state = UIState.DRAFT
@@ -1013,7 +1017,7 @@ def main():
                         focus_idx = min(2, focus_idx + 1)
 
                     elif e.key == pg.K_r:
-                        draft_list, _ = reroll_draft(player.ligne, player, draft_list, pioche, entrance_direction_for_draft)    
+                        draft_list, _ = reroll_draft(player.ligne, player.colonne, player, draft_list, pioche, entrance_direction_for_draft)    
                     elif e.key in (pg.K_SPACE, pg.K_RETURN):
                         spec, rotation = draft_list[focus_idx]
                         cost = spec.cost_gems or 0
