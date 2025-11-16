@@ -118,7 +118,7 @@ class UIState(Enum):
     QUITTING = 4
     GAME_OVER = 5
     WIN = 6
-
+    INTERACT = 7
 # ===============
 #  MENU PRINCIPAL 
 # ===============
@@ -729,6 +729,37 @@ def draw_draft(screen, font, big, draft_list, focus_idx, icons):
     screen.blit(use, use.get_rect(center=(x0 + SIDEBAR_W//2, 400)))
 
 # ===========
+#  INTERACT
+# ===========
+def draw_interact_menu(screen, font, big, interact_list, focus_idx):
+    """
+    Dessine un menu pour choisir une action
+    """
+    x0 = BOARD_W + (SIDEBAR_W // 2)
+    h = 40
+    w = 300
+    
+    total_h = (len(interact_list) * h) + 40
+    y0 = H // 2 - (total_h // 2)
+    
+    menu_rect = pg.Rect(x0 - w//2, y0, w, total_h)
+    pg.draw.rect(screen, BG2, menu_rect, border_radius=10) 
+    pg.draw.rect(screen, WHITE, menu_rect, width=2, border_radius=10)
+    
+    title = big.render("Actions:", True, WHITE)
+    screen.blit(title, title.get_rect(center=(x0, y0 + 20)))
+    
+    current_y = y0 + 50
+    for i, (action, item) in enumerate(interact_list):
+        
+        text = f"{action} {item.nom}"
+        color = (0, 150, 255) if i == focus_idx else WHITE
+        
+        txt = font.render(text, True, color)
+        screen.blit(txt, txt.get_rect(center=(x0, current_y)))
+        current_y += h
+    
+# ===========
 #  GAME OVER
 # ===========
 
@@ -814,6 +845,9 @@ def main():
     focus_idx = 0
     entrance_direction_for_draft = None
     
+    interact_list = [] 
+    interact_focus_idx = 0
+    
     step_flash = None
     step_flash_time = 0
 
@@ -881,36 +915,20 @@ def main():
                     if e.key == pg.K_u: 
                         r, c = player.ligne, player.colonne
                         room = room_grid[r][c]
+                        interact_list = []
                         
-                        if room and room.effects:
-            
-                            if room.effects.get("objets_a_ramasser"):
-                            
-                                objet_a_ramasser = room.effects["objets_a_ramasser"].pop(0)
+                        for item in room.effects.get("objets_a_ramasser", []):
+                            interact_list.append( ("Ramasser", item) )
                                 
-                                # S'il est permanent (Pelle, Marteau...)
-                                if isinstance(objet_a_ramasser, objetpermanent):
-                                    player.add_item(objet_a_ramasser.nom, 1)
-                                    last_message = f"Vous ramassez : {objet_a_ramasser.nom}"
-                                # S'il est consommable (Pomme, Repas...)
-                                else:
-                                    message = player.utiliser_objet(objet_a_ramasser)
-                                    last_message = message
-                            
-                            # 2. Sinon, on essaie d'UTILISER un objet (Coffre, Casier...)
-                            elif room.effects.get("interactifs"):
-                                
-                                objet_a_utiliser = room.effects["interactifs"][0]
-                                
-                                message = player.utiliser_objet(objet_a_utiliser)
-                                
-                                # On affiche le message à l'écran !
-                                last_message = message
-                            else:
-                                last_message = "Il n'y a rien à utiliser ici."
-                        else:
-                    
+                        for item in room.effects.get("interactifs", []):
+                            interact_list.append( ("Utiliser", item) )
+                        
+                        if not interact_list:
                             last_message = "Il n'y a rien à utiliser ici."
+                        else:
+                            interact_focus_idx = 0
+                            state = UIState.INTERACT
+                            last_message = None
     
                     elif e.key == pg.K_ESCAPE:
                         state = UIState.MENU
@@ -1026,6 +1044,7 @@ def main():
             draw_sidebar(v_screen, font, big, player, name, icons, last_message, step_flash, step_flash_time)
             scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H), border_texture=brick_texture)
             clock.tick(FPS)
+            continue
   
         # ------------ DRAFT ----------------
         if state == UIState.DRAFT:
@@ -1075,10 +1094,55 @@ def main():
             draw_draft(v_screen, font, big, draft_list, focus_idx, icons)
             scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H), border_texture=brick_texture)
             clock.tick(FPS)
+            continue
 
         if state == UIState.QUITTING:
             running = False
+        
+        # ------------ INTERACT -----------
+        if state == UIState.INTERACT:
+            
+            for e in pg.event.get():
+                if e.type == pg.QUIT:
+                    state = UIState.QUITTING
+                
+                elif e.type == pg.KEYDOWN:
+                    if e.key in (pg.K_UP, pg.K_z):
+                        interact_focus_idx = (interact_focus_idx - 1) % len(interact_list)
+                    elif e.key in (pg.K_DOWN, pg.K_s):
+                        interact_focus_idx = (interact_focus_idx + 1) % len(interact_list)
 
+                    elif e.key == pg.K_ESCAPE:
+                        state = UIState.PLAYING
+
+                    elif e.key in (pg.K_SPACE, pg.K_RETURN, pg.K_u):
+
+                        action, item = interact_list[interact_focus_idx]
+                        room = room_grid[player.ligne][player.colonne]
+
+                        if action == "Ramasser":
+                            if isinstance(item, objetpermanent):
+                                player.add_item(item.nom, 1)
+                                last_message = f"Vous ramassez : {item.nom}"
+                            else:
+                                last_message = player.utiliser_objet(item)
+
+                            room.effects["objets_a_ramasser"].remove(item)
+
+                        elif action == "Utiliser":
+                            last_message = player.utiliser_objet(item)
+
+                        state = UIState.PLAYING
+                        
+        draw_board(v_screen, room_grid, player, img_entree, img_anti, active_direction)
+        current_room = room_grid[player.ligne][player.colonne]
+        name = current_room.spec.name if current_room else "Unknown room"
+        draw_sidebar(v_screen, font, big, player, name, icons, None, step_flash, step_flash_time)
+        draw_interact_menu(v_screen, font, big, interact_list, interact_focus_idx)
+        scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
+        clock.tick(FPS)
+        continue
+    
     pg.quit()
     return 0
 
