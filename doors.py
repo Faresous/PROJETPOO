@@ -610,7 +610,7 @@ class Rooms:
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
 
         "NURSERY": RoomSpec(key="NURSERY", name="Nursery", desc="Whenever you draft a Bedroom, gain 5 steps.",
-            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common"
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common",
             cost_gems=1),
 
         "SERVANTS_QUARTERS": RoomSpec(key="SERVANTS_QUARTERS", name="Servant's Quarters", desc="+1 step for each Bedroom in your house.",
@@ -624,6 +624,93 @@ class Rooms:
 
         "MASTER_BEDROOM": RoomSpec(key="MASTER_BEDROOM", name="Master Bedroom", desc="+1 step for each room in your house.",
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Rare", cost_gems=2),
+        
+        #Green Rooms 
+        "TERRACE": RoomSpec(
+            key="TERRACE",
+            name="Terrace",
+            desc="Green Rooms do not cost gems to draft.",
+            shape=RoomShape.DEAD_END,
+            color=RoomColor.GREEN,
+            tags=("garden",),
+            rarity_label="Standard",
+        ),
+
+        "PATIO": RoomSpec(
+            key="PATIO",
+            name="Patio",
+            desc="Spread gems in each Green Room.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.GREEN,
+            tags=("garden","spread"),
+            rarity_label="Standard",
+            cost_gems=1,
+        ),
+
+        "COURTYARD": RoomSpec(
+            key="COURTYARD",
+            name="Courtyard",
+            desc="Central green area with 3 exits.",
+            shape=RoomShape.T_SHAPE,
+            color=RoomColor.GREEN,
+            tags=("garden","hub"),
+            rarity_label="Standard",
+            cost_gems=1,
+        ),
+
+        "CLOISTER": RoomSpec(
+            key="CLOISTER",
+            name="Cloister",
+            desc="A peaceful cloister with exits in all directions.",
+            shape=RoomShape.FOUR_WAY,
+            color=RoomColor.GREEN,
+            tags=("garden","hub"),
+            rarity_label="Unusual",
+            cost_gems=3,
+        ),
+
+        "VERANDA": RoomSpec(
+            key="VERANDA",
+            name="Veranda",
+            desc="Higher chance of finding items in Green Rooms.",
+            shape=RoomShape.STRAIGHT,
+            color=RoomColor.GREEN,
+            tags=("garden","buff"),
+            rarity_label="Unusual",
+            cost_gems=2,
+        ),
+
+        "GREENHOUSE": RoomSpec(
+            key="GREENHOUSE",
+            name="Greenhouse",
+            desc="More likely to draw Green Rooms while drafting.",
+            shape=RoomShape.DEAD_END,
+            color=RoomColor.GREEN,
+            tags=("garden","draft_boost"),
+            rarity_label="Standard",
+            cost_gems=1,
+        ),
+
+        "MORNING_ROOM": RoomSpec(
+            key="MORNING_ROOM",
+            name="Morning Room",
+            desc="+2 gems. Tomorrow you will start with +2 steps.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.GREEN,
+            tags=("garden","buff"),
+            rarity_label="Rare",
+        ),
+
+        "SECRET_GARDEN": RoomSpec(
+            key="SECRET_GARDEN",
+            name="Secret Garden",
+            desc="Spread fruit throughout the house.",
+            shape=RoomShape.T_SHAPE,
+            color=RoomColor.GREEN,
+            tags=("garden","spread"),
+            rarity_label="Rare",
+        ),
+
 
     }
 
