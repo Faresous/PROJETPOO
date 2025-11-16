@@ -10,8 +10,8 @@ class joueur:
         # Objets Consomables
         self.pas = 70
         self.orr = 0
-        self.gemmes = 2
-        self.cles = 0
+        self.gemmes = 100
+        self.cles = 100
         self.des = 0
         
         # Objets permanants que le joueur trouvera 

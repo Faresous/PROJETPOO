@@ -49,15 +49,11 @@ class DoorState(str, Enum):
 
 class RoomShape(Enum):
     """Topologie géométrique d'une salle(différentes formes de salles)."""
-    FOUR_WAY = auto()   # N, E, S, O
-    T_SHAPE = auto() # par convention ouvert vers le Nord: S, E, O
-    T_INVERSE_SHAPE =auto()
-    L_SHAPE = auto()
-    SOUTH_EST_SHAPE =auto()
-    SOUTH_OUEST_SHAPE =auto()
-    NORTH_OUSET_SHAPE =auto()
-    STRAIGHT = auto()   # opposées: N, S
-    DEAD_END = auto()   # cul-de-sac: S
+    FOUR_WAY = auto()   # 4 portes (N, E, S, O)
+    T_SHAPE = auto()    # 3 portes (N, E, S)
+    L_SHAPE = auto()    # 2 portes adjacentes (N, E)
+    STRAIGHT = auto()   # 2 portes opposées (N, S)
+    DEAD_END = auto()   # 1 porte (N)
     SPECIAL = auto()    # cas irréguliers
 
 
@@ -142,6 +138,7 @@ class Room:
     Salle concrète instanciée depuis un RoomSpec, avec ses portes et effets.
     """
     spec: RoomSpec
+    rotation: int = 0
     doors: Dict[Orientation, Door] = field(default_factory=dict)
     loot: Tuple[str, ...] = ()
     effects: Dict[str, Any] = field(default_factory=dict)
@@ -273,7 +270,49 @@ class Doors:
       - génération des portes d"une salle
       - tirage aléatoire de raretés par orientation
     """
-
+    ROTATION_MAP = {
+        Orientation.N: Orientation.E,
+        Orientation.E: Orientation.S,
+        Orientation.S: Orientation.O,
+        Orientation.O: Orientation.N,
+    }
+    
+    @staticmethod
+    def rotate_orientation(dir: Orientation, rotation: int) -> Orientation:
+        """Fait pivoter une orientation de N degrés (multiples de 90)."""
+        if rotation == 0:
+            return dir
+        if rotation == 90:
+            return Doors.ROTATION_MAP[dir]
+        if rotation == 180:
+            return Doors.ROTATION_MAP[Doors.ROTATION_MAP[dir]]
+        if rotation == 270:
+            return Doors.ROTATION_MAP[Doors.ROTATION_MAP[Doors.ROTATION_MAP[dir]]]
+        return dir
+    
+    @staticmethod
+    def shape_orientations(shape: RoomShape, rotation: int) -> Tuple[Orientation, ...]:
+        """
+        Renvoie les orientations actives pour une forme ET une rotation données.
+        Les formes de base sont (par convention) orientées au Nord.
+        """
+        base_dirs = []
+        if shape == RoomShape.FOUR_WAY:
+            base_dirs = [Orientation.S, Orientation.O, Orientation.N, Orientation.E]
+        elif shape == RoomShape.T_SHAPE:
+            base_dirs = [Orientation.S, Orientation.O, Orientation.E] # T "couché"
+        elif shape == RoomShape.L_SHAPE:
+            base_dirs = [Orientation.S, Orientation.O]
+        elif shape == RoomShape.STRAIGHT:
+            base_dirs = [Orientation.S, Orientation.N]
+        elif shape == RoomShape.DEAD_END:
+            base_dirs = [Orientation.S] # Toujours vers le "haut" par défaut
+        
+        # Applique la rotation demandée à chaque porte de base
+        rotated_dirs = [Doors.rotate_orientation(d, rotation) for d in base_dirs]
+        return tuple(rotated_dirs)
+    
+    
     @staticmethod
     def level_by_row(row: int, rows: int = ROWS_DEFAULT, rng: random.Random = rng_default) -> int:
         """
@@ -300,39 +339,26 @@ class Doors:
         }[r]
 
     @staticmethod
-    def shape_orientations(shape: RoomShape) -> Tuple[Orientation, ...]:
-        """Renvoie les orientations actives associées à une forme de salle."""
-        if shape == RoomShape.FOUR_WAY:
-            return (Orientation.N, Orientation.E, Orientation.S, Orientation.O)
-        if shape == RoomShape.T_SHAPE:
-            return (Orientation.S, Orientation.E, Orientation.O)
-        if shape == RoomShape.T_INVERSE_SHAPE:
-            return (Orientation.N, Orientation.E, Orientation.O)
-        if shape == RoomShape.L_SHAPE:
-            return (Orientation.N, Orientation.E)
-        if shape == RoomShape.SOUTH_EST_SHAPE:
-            return (Orientation.S, Orientation.E)
-        if shape == RoomShape.SOUTH_OUEST_SHAPE:
-            return (Orientation.S, Orientation.O)
-        if shape == RoomShape.NORTH_OUSET_SHAPE:
-            return (Orientation.N, Orientation.O)
-        if shape == RoomShape.STRAIGHT:
-            return (Orientation.N, Orientation.S)
-        if shape == RoomShape.DEAD_END:
-            return (Orientation.S)
-        return tuple()  # SPECIAL
-
-    @staticmethod
-    def make_for_shape(shape: RoomShape, row: int, rng: Optional[random.Random]) -> Dict[Orientation, Door]:
+    def make_for_shape(shape: RoomShape, row: int, rotation: int, rng: Optional[random.Random]) -> Dict[Orientation, Door]:
         """
-        Génère les portes d'une salle suivant sa forme et sa raretée.
+        Génère les portes d'une salle suivant sa forme, 
+        sa rotation, et sa rareté (rangée).
         """
-        dirs = Doors.shape_orientations(shape)
+        # 1. Calcule les directions des portes APRES rotation
+        dirs = Doors.shape_orientations(shape, rotation)
         rng = rng or random.Random()
         out: Dict[Orientation, Door] = {}
+        
         for d in dirs:
-            r = Rarity(Doors.level_by_row(row, rng=rng))
-            out[d] = Door(rarity=r, state=DoorState.UNLOCKED)
+            # 2. Détermine le niveau de difficulté
+            level = Doors.level_by_row(row, rng=rng)
+            rarity = Rarity(level)
+            
+            # 3. Détermine l'état de verrouillage
+            state = Doors.default_state_from_rarity(rarity)
+            
+            # 4. Crée la porte
+            out[d] = Door(rarity=rarity, state=state)
             
         return out
 
@@ -357,7 +383,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint","permanent"), rarity_label="Rare", cost_gems=0),
 
         "ENTRANCE_HALL": RoomSpec(key="ENTRANCE_HALL", name="Entrance Hall",
-            desc="Point de départ quotidien. Trois portes.", shape=RoomShape.T_INVERSE_SHAPE,
+            desc="Point de départ quotidien. Trois portes.", shape=RoomShape.T_SHAPE,
             color=RoomColor.ORANGE, tags=("permanent","blueprint"), rarity_label="N/A", cost_gems=0),
 
         "SPARE_ROOM": RoomSpec(key="SPARE_ROOM", name="Spare Room",
@@ -365,15 +391,15 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Common"),
 
         "ROTUNDA": RoomSpec(key="ROTUNDA", name="Rotunda",
-            desc="Salle rotative. Deux portes actives à la fois.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Salle rotative. Deux portes actives à la fois.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Common", cost_gems=3),
 
         "PARLOR": RoomSpec(key="PARLOR", name="Parlor",
-            desc="Puzzle du salon.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Puzzle du salon.", shape=RoomShape.L_SHAPE,
             color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
 
         "BILLIARD_ROOM": RoomSpec(key="BILLIARD_ROOM", name="Billiard Room",
-            desc="Puzzle de fléchettes.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Puzzle de fléchettes.", shape=RoomShape.L_SHAPE,
             color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
 
         "GALLERY": RoomSpec(key="GALLERY", name="Gallery",
@@ -381,7 +407,7 @@ class Rooms:
             color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
 
         "ROOM_8": RoomSpec(key="ROOM_8", name="Room 8",
-            desc="Pièce verrouillée par la clé Room 8.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Pièce verrouillée par la clé Room 8.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint","puzzle"), rarity_label="Rare"),
 
         "CLOSET": RoomSpec(key="CLOSET", name="Closet",
@@ -402,7 +428,7 @@ class Rooms:
 
         # 013–024
         "NOOK": RoomSpec(key="NOOK", name="Nook",
-            desc="Contient toujours 1 clé.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Contient toujours 1 clé.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Commonplace"),
 
         "GARAGE": RoomSpec(key="GARAGE", name="Garage",
@@ -410,7 +436,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Unusual", cost_gems=1),
 
         "MUSIC_ROOM": RoomSpec(key="MUSIC_ROOM", name="Music Room",
-            desc="Feuilles de musique, 1 clé spéciale.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Feuilles de musique, 1 clé spéciale.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard", cost_gems=2),
 
         "LOCKER_ROOM": RoomSpec(key="LOCKER_ROOM", name="Locker Room",
@@ -426,7 +452,7 @@ class Rooms:
             color=RoomColor.GREEN, tags=("blueprint","dead_end"), rarity_label="Commonplace"),
 
         "TROPHY_ROOM": RoomSpec(key="TROPHY_ROOM", name="Trophy Room",
-            desc="Musée des trophées. 8 gemmes.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Musée des trophées. 8 gemmes.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard", cost_gems=5),
 
         "BALLROOM": RoomSpec(key="BALLROOM", name="Ballroom",
@@ -434,7 +460,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint","entry"), rarity_label="Unusual", cost_gems=2),
 
         "PANTRY": RoomSpec(key="PANTRY", name="Pantry",
-            desc="Fruit aléatoire et 4 pièces.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Fruit aléatoire et 4 pièces.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Commonplace"),
 
         "RUMPUS_ROOM": RoomSpec(key="RUMPUS_ROOM", name="Rumpus Room",
@@ -446,7 +472,7 @@ class Rooms:
             color=RoomColor.GREEN, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3),
 
         "OFFICE": RoomSpec(key="OFFICE", name="Office",
-            desc="Terminal: paie, email, diffusion de pièces.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Terminal: paie, email, diffusion de pièces.", shape=RoomShape.L_SHAPE,
             color=RoomColor.YELLOW, tags=("blueprint","spread","terminal"), rarity_label="Standard", cost_gems=2),
 
         # 025–036
@@ -459,7 +485,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
 
         "LIBRARY": RoomSpec(key="LIBRARY", name="Library",
-            desc="Découvre des plans moins communs. L-shape.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Découvre des plans moins communs. L-shape.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
 
         "CHAMBER_OF_MIRRORS": RoomSpec(key="CHAMBER_OF_MIRRORS", name="Chamber of Mirrors",
@@ -483,7 +509,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Standard"),
 
         "PUMP_ROOM": RoomSpec(key="PUMP_ROOM", name="Pump Room",
-            desc="Salle mécanique. Modifie niveaux d’eau. L-shape.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Salle mécanique. Modifie niveaux d’eau. L-shape.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Standard"),
 
         "SECURITY": RoomSpec(key="SECURITY", name="Security",
@@ -495,7 +521,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint","mechanical"), rarity_label="Standard"),
 
         "LABORATORY": RoomSpec(key="LABORATORY", name="Laboratory",
-            desc="Expériences; déblocages permanents. L-shape.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="Expériences; déblocages permanents. L-shape.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint","mechanical","terminal"), rarity_label="Standard"),
 
         # 037–046
@@ -520,7 +546,7 @@ class Rooms:
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
 
         "OBSERVATORY": RoomSpec(key="OBSERVATORY", name="Observatory",
-            desc="+1 étoile permanente; constellations.", shape=RoomShape.SOUTH_OUEST_SHAPE,
+            desc="+1 étoile permanente; constellations.", shape=RoomShape.L_SHAPE,
             color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
 
         "CONFERENCE_ROOM": RoomSpec(key="CONFERENCE_ROOM", name="Conference Room",
@@ -544,13 +570,13 @@ class Rooms:
 
     # ---------- Usines / Générateurs ----------
     @staticmethod
-    def generate_room(spec_key: str, row: int, rng: Optional[random.Random] = None) -> Room:
+    def generate_room(spec_key: str, row: int,rotation: int = 0, rng: Optional[random.Random] = None) -> Room:
         """
         Instancie une Room depuis sa RoomSpec, génère ses portes et applique la logique dentrée.
         """
         rng = rng or random.Random()
         spec = Rooms.ROOMS_DB[spec_key]
-        doors = Doors.make_for_shape(spec.shape, row, rng)
-        room = Room(spec=spec, doors=doors, effects={})
+        doors = Doors.make_for_shape(spec.shape, row, rotation, rng)
+        room = Room(spec=spec, rotation=rotation,doors=doors, effects={})
         room.on_enter(rng)
         return room

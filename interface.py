@@ -1,5 +1,5 @@
 # =====================================================
-#  interface.py – Interface graphique du jeu BluePrince
+#  interfacepy – Interface graphique du jeu BluePrince
 # =====================================================
 
 import os
@@ -242,36 +242,53 @@ def opt_obj(name):
 #  TIRAGE DE 3 SALLES
 # ====================
 
-def draft_three_rooms(row: int):
+def get_opposite_dir(dir: Orientation):
+    """Retourne l'orientation opposée"""
+    if dir == Orientation.N: return Orientation.S
+    if dir == Orientation.S: return Orientation.N
+    if dir == Orientation.E: return Orientation.O
+    if dir == Orientation.O: return Orientation.E
+    return None
+
+def draft_three_rooms(row: int, entrance_direction: Orientation , pioche: list):
     """ Tire trois salles compatibles avec la rareté. """
-    specs = [
-        spec for key, spec in Rooms.ROOMS_DB.items()
-        if key not in {"ROOM_46", "ANTECHAMBER"}]
-    out = []
+    
+    needed_door = get_opposite_dir(entrance_direction)
+    
+    valid_options = []
+    for spec in pioche:
+        if spec.key in {"ROOM_46", "ANTECHAMBER"}:
+            continue
+            
+        # On teste les 4 rotations
+        for rotation in [0, 90, 180, 270]:
+            # Calcule les portes pour cette rotation
+            room_doors = Doors.shape_orientations(spec.shape, rotation)
+            
+            if needed_door in room_doors:
+                valid_options.append( (spec, rotation) )
+                break
+            
+    lvl = Doors.level_by_row(row)
+    if lvl == 0:
+        rare_ok = ("Common","Commonplace","Standard",None)
+    elif lvl == 1:
+        rare_ok = ("Unusual","Rare","Standard")
+    else:
+        rare_ok = ("Rumored","Epic","Very Rare","Rare")
+    
+    pool = valid_options
+    if len(pool) < 3:
+        return random.choices(pool, k=3)
+    else:
+        return random.sample(pool, 3)
 
-    for _ in range(3):
-        lvl = Doors.level_by_row(row)
-
-        if lvl == 0:
-            rare_ok = ("Common","Commonplace","Standard",None)
-        elif lvl == 1:
-            rare_ok = ("Unusual","Rare","Standard")
-        else:
-            rare_ok = ("Rumored","Epic","Very Rare","Rare")
-
-        pool = [s for s in specs if s.rarity_label in rare_ok]
-        if not pool:
-            pool = specs
-        out.append(random.choice(pool))
-
-    return out
-
-def reroll_draft(row: int, player: joueur, draft_list):
+def reroll_draft(row: int, player: joueur, draft_list,pioche: list, entrance_dir: Orientation):
     """ Reroll du draft si joueur possède un dé. """
     if player.des <= 0:
         return draft_list, False
     player.des -= 1
-    return draft_three_rooms(row), True
+    return draft_three_rooms(row, entrance_dir, pioche), True
 
 def apply_room_loot(player: joueur, room: Room):
     """ Applique effets immédiats : gemmes, pas, malus. """
@@ -441,7 +458,9 @@ def draw_board(screen, room_grid, player: joueur, img_entree, img_anti, active_d
                     # AJOUT : afficher l'image de la salle si disponible
                     img = ROOM_IMAGES.get(room.spec.key)
                     if img:
-                        screen.blit(img, img.get_rect(center=rect.center))
+                        rotation = room.rotation
+                        rotated_img = pg.transform.rotate(img, -rotation)
+                        screen.blit(rotated_img, rotated_img.get_rect(center=rect.center))
                     else:
                         pg.draw.rect(screen, ROOM_COL, rect, border_radius=8)
 
@@ -536,14 +555,15 @@ def draw_draft(screen, font, big, draft_list, focus_idx):
     xs = [x0+90, x0+220, x0+350]   # positions horizontales des 3 rooms
     img_size = 80                # taille des images des salles
 
-    for i, spec in enumerate(draft_list):
+    for i, (spec, rotation) in enumerate(draft_list):
 
         # IMAGE DE LA SALLE
         img = ROOM_IMAGES.get(spec.key)
         if img:
             # redimensionner proprement
             room_img = pg.transform.smoothscale(img, (img_size, img_size))
-            screen.blit(room_img, room_img.get_rect(center=(xs[i], 170)))
+            rotated_img = pg.transform.rotate(room_img, -rotation)
+            screen.blit(rotated_img, rotated_img.get_rect(center=(xs[i], 170)))
         else:
             # fallback sans image
             pg.draw.rect(screen, (200,200,200),
@@ -615,15 +635,20 @@ def main():
     player = joueur(ENTRY_POS[0], ENTRY_POS[1])
 
     room_grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
-    room_grid[ENTRY_POS[0]][ENTRY_POS[1]] = Rooms.generate_room("ENTRANCE_HALL", row=ENTRY_POS[0])
+    room_grid[ENTRY_POS[0]][ENTRY_POS[1]] = Rooms.generate_room("ENTRANCE_HALL", row=ENTRY_POS[0],rotation=180)
     room_grid[ANTI_POS[0]][ANTI_POS[1]]   = Rooms.generate_room("ANTECHAMBER",   row=0)
 
+    # PIOCHE 
+    pioche = list(Rooms.ROOMS_DB.values())
+    pioche = [spec for spec in pioche if spec.key not in {"ENTRANCE_HALL", "ANTECHAMBER", "ROOM_46"}]
+    
     state = UIState.MENU
     active_direction = None
     last_message = None
     draft_list = None
     focus_idx = 0
-
+    entrance_direction_for_draft = None
+    
     step_flash = None
     step_flash_time = 0
 
@@ -749,7 +774,8 @@ def main():
 
                         # nouvelle salle
                         if room_grid[player.ligne][player.colonne] is None:
-                            draft_list = draft_three_rooms(player.ligne)
+                            entrance_direction_for_draft = active_direction
+                            draft_list = draft_three_rooms(player.ligne, entrance_direction_for_draft, pioche)
                             focus_idx = 0
                             active_direction = None
                             state = UIState.DRAFT
@@ -799,19 +825,22 @@ def main():
                         focus_idx = min(2, focus_idx + 1)
 
                     elif e.key == pg.K_r:
-                        draft_list, _ = reroll_draft(player.ligne, player, draft_list)
-
+                        draft_list, _ = reroll_draft(player.ligne, player, draft_list, pioche, entrance_direction_for_draft)    
                     elif e.key in (pg.K_SPACE, pg.K_RETURN):
-                        spec = draft_list[focus_idx]
+                        spec, rotation = draft_list[focus_idx]
                         cost = spec.cost_gems or 0
                         
                         if not player.utiliser_gems(cost):
                             last_message = "Pas assez de gems!"
                             continue
                         
-                        room = Rooms.generate_room(spec.key, row=player.ligne)
+                        if spec in pioche:
+                            pioche.remove(spec)
+                        
+                        room = Rooms.generate_room(spec.key, row=player.ligne, rotation=rotation)
                         room_grid[player.ligne][player.colonne] = room
-
+                        last_message = f"Le joueur a depense {cost} gemmes !"
+                        
                         msg = apply_room_loot(player, room)
                         if msg and msg.startswith("You gain"):
                             gain = int(msg.split()[2])
