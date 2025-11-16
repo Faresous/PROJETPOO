@@ -197,9 +197,8 @@ class Room:
         
         if spec.color == RoomColor.GREEN:
             interactifs.append(endroits_ou_creuser())
+            objets_a_ramasser.append(Pelle())
             
-            if rng.randint(1, 3) == 1: 
-                objets_a_ramasser.append(Pelle())
             if rng.randint(1, 5) == 1: 
                 objets_a_ramasser.append(rng.choice([Patte_de_lapin(), Detecteur_de_metaux()]))
         

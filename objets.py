@@ -118,11 +118,14 @@ class objets_insolites(objet) :
         self.valeur = valeur
         
     def utiliser(self, joueur):
+        if self.valeur <= 0:
+            return f"{self.nom} est déjà mangé."
+        reward = self.valeur
+        
         if joueur.add_item("pas", self.valeur):
-            print(f"{joueur} a mangé {self.nom} et regagne + {self.valeur} pas!")
             self.valeur = 0
-            return True
-        return False
+            return f"Vous mangez {self.nom} et regagnez +{reward} pas!"
+            
     
 class Pomme(objets_insolites):
     """Redonne 2 pas"""
@@ -189,44 +192,38 @@ class endroits_ou_creuser(objets_interactifs):
     def utiliser(self, joueur):
         
         if self.deja_utilise:
-            print("Vous avez déjà creusé")
-            return False
+            return "Vous avez déjà creusé"
 
         if "Pelle" in joueur.objet_permanents:
-            print("Vous avez utilisez la Pelle pour déterrer quelque chose !")
             
             resultat = random.randint(1, 6) 
+            self.deja_utilise = True
             
             if resultat == 1:
-                print("Vous déterrez 15 pièces d'or !")
                 joueur.add_item("orr", 15) 
+                return "Vous déterrez 15 pièces d'or !"
             
             elif resultat == 2:
-                print("Vous déterrez 1 cle !")
                 joueur.add_item("cles", 1)   
+                return "Vous déterrez 1 cle !"
                  
             elif resultat == 3:
-                print("Vous déterrez 5 pas !")
                 joueur.add_item("pas", 5) 
+                return "Vous déterrez 5 pas !"
                 
             elif resultat == 4:
-                print("Vous déterrez 1 gemme !")
                 joueur.add_item("gemmes", 1) 
+                return "Vous déterrez 1 gemme !"
                 
             elif resultat == 5:
-                print("Vous déterrez 1 de !")
                 joueur.add_item("des", 1) 
+                return "Vous déterrez 1 de !"
                 
             else: 
-                print("... mais vous ne trouvez rien :(")
-                
-                
-            self.deja_utilise = True
-            return True
+                return "... mais vous ne trouvez rien :("
         
         else:
-            print("Vous avez besoin d'une pelle pour creuser !")
-            return False
+            return "Vous avez besoin d'une pelle pour creuser !"
         
         
 class coffre(objets_interactifs):
@@ -241,63 +238,56 @@ class coffre(objets_interactifs):
 
     def utiliser(self, joueur):
         if self.deja_utilise:
-            print("Le coffre est déjà ouvert")
-            return False
+            return  "Le coffre est déjà ouvert" 
         
         # On vérifie si le joueur a un Marteau
         
         if "Marteau" in joueur.objet_permanents:
-            print("Vous utilisez le marteau pour ouvrir le coffre")
-            
+            self.deja_utilise = True
             resultat = random.randint(1, 4)
             
             if resultat == 1:
-                print("Vous trouvez 25 pièces d'or !")
-                joueur.add_item("orr", 25) 
+                joueur.add_item("orr", 25)
+                return "Vous utilisez le marteau et trouvez 25 pièces d'or !" 
                 
             elif resultat == 2:
-                print("Vous trouvez 10 pas !")
                 joueur.add_item("pas", 10) 
+                return "Vous utilisez le marteau et trouvez 10 pas !"
                 
             elif resultat == 3:
-                print("Vous trouvez 1 gemmes !")
                 joueur.add_item("gemmes", 1)
+                return "Vous utilisez le marteau et trouvez 1 gemme !"
                  
             else:
-                print("Vous trouvez 2 dés !")
                 joueur.add_item("des", 2)
-                
-            self.deja_utilise = True
-            return True
+                return "Vous utilisez le marteau et trouvez 2 dés !"
             
         # On vérifie si le joueur a une cle        
         if joueur.cles > 0:
-            print("Vous utilisez une clé pour ouvrir le coffre")
+            
+            self.deja_utilise = True
             joueur.cles -= 1    # On consomme une clé
             
             resultat = random.randint(1, 4)
             
             if resultat == 1:
-                print("Vous trouvez 25 pièces d'or !")
                 joueur.add_item("orr", 25) 
+                return "Vous utilisez une clé et trouvez 25 pièces d'or !"
                 
             elif resultat == 2:
-                print("Vous trouvez 10 pas !")
                 joueur.add_item("pas", 10) 
+                return "Vous utilisez une clé et trouvez 10 pas !"
                 
             elif resultat == 3:
-                print("Vous trouvez 1 gemmes !")
                 joueur.add_item("gemmes", 1)
+                return "Vous utilisez une clé et trouvez 1 gemme !"
                  
             else:
-                print("Vous trouvez 2 dés !")
                 joueur.add_item("des", 2)
-            self.deja_utilise = True
-            return True
+                return "Vous utilisez une clé et trouvez 2 dés !"
 
         print("Le coffre est verrouillé il vous faut une clé ou un marteau.")
-        return False
-    
+        
 class casier(objets_interactifs) :
     """
     Un casier qui s'ouvre avec une clé et qui donne des objets consommables ou rien
@@ -310,43 +300,36 @@ class casier(objets_interactifs) :
     
     def utiliser(self, joueur):
         if self.deja_utilise:
-            print("Le casier est déja ouvert")
-            return False
+            return "Le casier est déja ouvert"
         
         # On vérifie si le joueur a une Clé
         if joueur.cles > 0: 
-            
-            print("Vous utilisez une clé pour ouvrir le casier")
-            
             joueur.cles -= 1 # On consomme la clé
-            
-            resultat = random.randint(1, 4)
+            self.deja_utilise = True
+
+            resultat = random.randint(1, 6) 
             
             if resultat == 1:
-                print("Vous trouvez 5 pièces d'or !")
                 joueur.add_item("orr", 5)
+                return "Vous ouvrez le casier et trouvez 5 pièces d'or !" 
                 
             elif resultat == 2:
-                print("Vous trouvez 1 dé !")
                 joueur.add_item("des", 1)
+                return "Vous ouvrez le casier et trouvez 1 dé !" 
                 
             elif resultat == 3:
-                print("Vous retrouvez 1 clé !")
                 joueur.add_item("cles", 1)
+                return "Vous ouvrez le casier et retrouvez 1 clé !" 
                 
             elif resultat == 4:
-                print("Vous trouvez 10 pas !")
                 joueur.add_item("pas", 10) 
+                return "Vous ouvrez le casier et trouvez 10 pas !" 
                 
             elif resultat == 5:
-                print("Vous trouvez 1 gemmes !")
                 joueur.add_item("gemmes", 1)
+                return "Vous ouvrez le casier et trouvez 1 gemme !" 
                 
             else:
-                print("Le casier est vide :(")
-                
-            self.deja_utilise = True
-            return True
+                return "Le casier est vide :(" 
 
-        print("Ce casier nécessite une clé pour l'ouvrir")
-        return False
+        return "Ce casier nécessite une clé pour ouvrir" 

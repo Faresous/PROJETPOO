@@ -9,7 +9,11 @@ import random
 from enum import Enum
 from doors import Rooms, Doors, Orientation, Room
 from joueur import joueur
-
+from objets import (
+    objetpermanent,
+    Pelle, Marteau, Kit_de_crochetage, Detecteur_de_metaux, Patte_de_lapin,
+    Pomme, Banane, Gateau, Sandwich, Repas, 
+    coffre, endroits_ou_creuser, casier)
 # ======================
 #  CONSTANTES GÉNÉRALES
 # ======================
@@ -582,8 +586,9 @@ def draw_draft(screen, font, big, draft_list, focus_idx):
             pg.draw.rect(screen, (0,120,255), rect, width=3, border_radius=8)
 
     rr = big.render("Redraw (R)", True, (60,60,60))
+    uu = big.render("Use Object (U)", True, (80,200,120))
     screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 340)))
-
+    screen.blit(uu, uu.get_rect(center=(x0 + SIDEBAR_W//2, 400)))
 
 # ===========
 #  GAME OVER
@@ -728,8 +733,42 @@ def main():
                     state = UIState.QUITTING
 
                 elif e.type == pg.KEYDOWN:
-
-                    if e.key == pg.K_ESCAPE:
+                    
+                    if e.key == pg.K_u: 
+                        r, c = player.ligne, player.colonne
+                        room = room_grid[r][c]
+                        
+                        if room and room.effects:
+            
+                            if room.effects.get("objets_a_ramasser"):
+                            
+                                objet_a_ramasser = room.effects["objets_a_ramasser"].pop(0)
+                                
+                                # S'il est permanent (Pelle, Marteau...)
+                                if isinstance(objet_a_ramasser, objetpermanent):
+                                    player.add_item(objet_a_ramasser.nom, 1)
+                                    last_message = f"Vous ramassez : {objet_a_ramasser.nom}"
+                                # S'il est consommable (Pomme, Repas...)
+                                else:
+                                    message = player.utiliser_objet(objet_a_ramasser)
+                                    last_message = message
+                            
+                            # 2. Sinon, on essaie d'UTILISER un objet (Coffre, Casier...)
+                            elif room.effects.get("interactifs"):
+                                
+                                objet_a_utiliser = room.effects["interactifs"][0]
+                                
+                                message = player.utiliser_objet(objet_a_utiliser)
+                                
+                                # On affiche le message à l'écran !
+                                last_message = message
+                            else:
+                                last_message = "Il n'y a rien à utiliser ici."
+                        else:
+                    
+                            last_message = "Il n'y a rien à utiliser ici."
+    
+                    elif e.key == pg.K_ESCAPE:
                         state = UIState.MENU
 
                     elif e.key in (pg.K_z, pg.K_UP):
