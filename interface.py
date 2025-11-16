@@ -395,7 +395,7 @@ def draw_direction_hint(screen, rect, direction: Orientation):
     Dessine un triangle blanc propre sur le bord de la salle pour indiquer
     la direction sélectionnée par le joueur.
     """
-    SIZE = 20
+    SIZE = 6
 
     if direction == Orientation.N:
         pts = [(rect.centerx, rect.top + 5),
