@@ -196,7 +196,14 @@ class endroits_ou_creuser(objets_interactifs):
 
         if "Pelle" in joueur.objet_permanents:
             
-            resultat = random.randint(1, 6) 
+            coup_1 = random.randint(1, 6) 
+            
+            if "Patte de lapin" in joueur.objet_permanents:
+                coup_2 = random.randint(1, 6)
+                resultat = min(coup_1, coup_2)
+            else:
+                resultat = coup_1
+                    
             self.deja_utilise = True
             
             if resultat == 1:
