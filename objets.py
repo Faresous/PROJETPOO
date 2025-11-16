@@ -203,6 +203,11 @@ class endroits_ou_creuser(objets_interactifs):
                 resultat = min(coup_1, coup_2)
             else:
                 resultat = coup_1
+            
+            if resultat not in [1, 2] and "Detecteur de metaux" in joueur.objet_permanents:
+                coup_detecteur = random.randint(1, 3)   
+                if coup_detecteur in [1, 2]:
+                    resultat = coup_detecteur
                     
             self.deja_utilise = True
             
@@ -250,9 +255,15 @@ class coffre(objets_interactifs):
         # On vérifie si le joueur a un Marteau
         
         if "Marteau" in joueur.objet_permanents:
+            
             self.deja_utilise = True
             resultat = random.randint(1, 4)
             
+            if resultat != 1 and "Detecteur de metaux" in joueur.objet_permanents:
+                coup_detecteur = random.randint(1, 4)
+                if coup_detecteur == 1:
+                    resultat = 1
+                    
             if resultat == 1:
                 joueur.add_item("orr", 25)
                 return "Vous utilisez le marteau et trouvez 25 pièces d'or !" 
@@ -277,6 +288,11 @@ class coffre(objets_interactifs):
             
             resultat = random.randint(1, 4)
             
+            if resultat != 1 and "Detecteur de metaux" in joueur.objet_permanents:
+                coup_detecteur = random.randint(1, 4)
+                if coup_detecteur == 1:
+                    resultat = 1
+                    
             if resultat == 1:
                 joueur.add_item("orr", 25) 
                 return "Vous utilisez une clé et trouvez 25 pièces d'or !"
@@ -314,7 +330,17 @@ class casier(objets_interactifs) :
             joueur.cles -= 1 # On consomme la clé
             self.deja_utilise = True
 
-            resultat = random.randint(1, 6) 
+            coup = random.randint(1, 6) 
+            if "Patte de lapin" in joueur.objet_permanents:
+                coup_2 = random.randint(1, 6)
+                resultat = min(coup, coup_2)
+            else:
+                resultat = coup
+            
+            if resultat not in [1, 3] and "Detecteur de metaux" in joueur.objet_permanents:
+                coup_detecteur = random.randint(1, 3)
+                if coup_detecteur in [1, 3]:
+                    resultat = coup_detecteur
             
             if resultat == 1:
                 joueur.add_item("orr", 5)

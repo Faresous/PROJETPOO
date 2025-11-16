@@ -645,7 +645,6 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
             ico = icons.get(key)
             if ico: screen.blit(ico, (colL,yL))
             screen.blit(font.render(label,True,TEXT_DARK),(colL+dx,yL+6))
-            screen.blit(big.render(str(inventory[key]),True,TEXT_DARK),(colL+valdx,yL+2))
             yL += INV_ICON + 24
 
     yR = 80
