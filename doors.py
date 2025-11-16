@@ -798,11 +798,83 @@ class Rooms:
             rarity_label="Rare",
         ),
 
+        # Red Rooms 
 
+        "LAVATORY": RoomSpec(
+            key="LAVATORY",
+            name="Lavatory",
+            desc="A basic red room.",
+            shape=RoomShape.DEAD_END,
+            color=RoomColor.RED,
+            rarity_label="Standard",
+        ),
 
+        "CHAPEL": RoomSpec(
+            key="CHAPEL",
+            name="Chapel",
+            desc="Whenever you enter: lose 1 step.",
+            shape=RoomShape.T_SHAPE,
+            color=RoomColor.RED,
+            rarity_label="Common",
+            #effects={"penalty": {"steps_minus": 1}}
+        ),
+
+        "MAIDS_CHAMBER": RoomSpec(
+            key="MAIDS_CHAMBER",
+            name="Maid's Chamber",
+            desc="Less likely to find items in your house.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.RED,
+            rarity_label="Unusual",
+        ),
+
+        "ARCHIVES": RoomSpec(
+            key="ARCHIVES",
+            name="Archives",
+            desc="While drafting, you can no longer see all 3 Floor Plans.",
+            shape=RoomShape.FOUR_WAY,
+            color=RoomColor.RED,
+            rarity_label="Unusual",
+        ),
+
+        "GYMNASIUM": RoomSpec(
+            key="GYMNASIUM",
+            name="Gymnasium",
+            desc="Whenever you enter: lose 2 steps.",
+            shape=RoomShape.T_SHAPE,
+            color=RoomColor.RED,
+            rarity_label="Standard",
+            #effects={"penalty": {"steps_minus": 2}}
+        ),
+
+        "DARKROOM": RoomSpec(
+            key="DARKROOM",
+            name="Darkroom",
+            desc="Cannot see Floor Plans while drafting in this room.",
+            shape=RoomShape.T_SHAPE,
+            color=RoomColor.RED,
+            rarity_label="Standard",
+        ),
+
+        "WEIGHT_ROOM": RoomSpec(
+            key="WEIGHT_ROOM",
+            name="Weight Room",
+            desc="Lose half your steps.",
+            shape=RoomShape.FOUR_WAY,
+            color=RoomColor.RED,
+            rarity_label="Rare",
+            #effects={"penalty": {"steps_minus_half": True}}
+        ),
+
+        "FURNACE": RoomSpec(
+            key="FURNACE",
+            name="Furnace",
+            desc="More likely to draw Red Rooms while drafting.",
+            shape=RoomShape.DEAD_END,
+            color=RoomColor.RED,
+            rarity_label="Rare",
+        ),
     }
-
-
 
     # ---------- Usines / Générateurs ----------
     @staticmethod
