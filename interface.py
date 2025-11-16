@@ -69,6 +69,7 @@ ROOM_SHORT_EFFECT = {
     "DARKROOM": "No Floor Plan visibility",
     "ARCHIVES": "Only 1 Floor Plan visible",
     "FURNACE": "More Red Rooms in draft",
+    "TELEPORT_PAD": "Teleports to another room",
 }
 
 # ============================================================
@@ -433,6 +434,25 @@ def apply_room_loot(player: joueur, room: Room, room_grid):
         coins = eff["loot_coins"]
         player.add_item("orr", coins)
         return f"You gain {coins} coin(s)."
+    
+    # --- TELEPORT PAD ---
+    if "teleport" in eff:
+    # liste des salles déjà construites (sauf la salle actuelle)
+        possible = [
+        (r, c) 
+        for r in range(ROWS) 
+        for c in range(COLS)
+        if room_grid[r][c] is not None and (r, c) != (player.ligne, player.colonne)
+        ]
+
+        if possible:
+            # téléportation aléatoire
+            r2, c2 = random.choice(possible)
+            player.ligne, player.colonne = r2, c2
+            return "You were teleported to another room!"
+        else:
+            return "Teleportation failed (no other room discovered)."
+
 
     return None
 

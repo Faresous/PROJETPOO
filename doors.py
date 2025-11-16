@@ -929,6 +929,10 @@ class Rooms:
             color=RoomColor.RED,
             rarity_label="Rare",
         ),
+        
+        # Chambre à effet spécial personalisée (téléportation)
+        "TELEPORT_PAD": RoomSpec(key="TELEPORT_PAD", name="Teleport Pad", desc="Teleports you to another discovered room.",
+            shape=RoomShape.STRAIGHT, color=RoomColor.BLUE, rarity_label="Unusual", effects={"teleport": True},),
     }
 
     # ---------- Usines / Générateurs ----------
