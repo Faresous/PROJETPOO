@@ -550,45 +550,60 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
 #  DRAFT
 # =======
 
-def draw_draft(screen, font, big, draft_list, focus_idx):
-    """ Affiche les 3 salles à sélectionner. """
+def draw_draft(screen, font, big, draft_list, focus_idx, icons):
+    """ Affiche les 3 salles à sélectionner """
     x0 = BOARD_W
     screen.fill((240,240,240), pg.Rect(x0,0,SIDEBAR_W,H))
 
     title = big.render("Choose a room to draft", True, TEXT_DARK)
-    screen.blit(title, (x0+80,40))
+    screen.blit(title, (x0+80, 40))
 
-    xs = [x0+90, x0+220, x0+350]   # positions horizontales des 3 rooms
-    img_size = 80                # taille des images des salles
+    xs = [x0+90, x0+220, x0+350]   # positions horizontales
+    img_size = 80                 # taille des images
 
-    for i, (spec, rotation) in enumerate(draft_list):
+    for i, entry in enumerate(draft_list):
 
-        # IMAGE DE LA SALLE
+        # gestion tuple (spec, rotation) ou juste spec
+        if isinstance(entry, tuple):
+            spec, rotation = entry
+        else:
+            spec = entry
+
+        # IMAGE
         img = ROOM_IMAGES.get(spec.key)
         if img:
-            # redimensionner proprement
             room_img = pg.transform.smoothscale(img, (img_size, img_size))
-            rotated_img = pg.transform.rotate(room_img, -rotation)
-            screen.blit(rotated_img, rotated_img.get_rect(center=(xs[i], 170)))
+            screen.blit(room_img, room_img.get_rect(center=(xs[i], 170)))
         else:
-            # fallback sans image
             pg.draw.rect(screen, (200,200,200),
                          pg.Rect(xs[i]-img_size//2, 170-img_size//2, img_size, img_size))
 
-        # NOM EN DESSOUS DE L’IMAGE
+        # NOM
         col = (0,120,255) if i==focus_idx else TEXT_DARK
         txt = font.render(spec.name, True, col)
-        screen.blit(txt, txt.get_rect(center=(xs[i], 270)))
+        screen.blit(txt, txt.get_rect(center=(xs[i], 260)))
 
-        # CADRE BLEU SI SÉLECTIONNÉ
+        # ==== AFFICHAGE COST GEMS ====
+        cost = spec.cost_gems if spec.cost_gems else 0
+
+        if cost > 0:
+            gem_icon = icons.get("gems")
+            if gem_icon:
+                gem_small = pg.transform.smoothscale(gem_icon, (20,20))
+                screen.blit(gem_small, (xs[i] - 10, 290))
+
+            cost_txt = font.render(str(cost), True, (0,0,0))
+            screen.blit(cost_txt, (xs[i] + 12, 292))
+
+        # CADRE DE SÉLECTION
         if i == focus_idx:
             rect = pg.Rect(xs[i]-img_size//2, 170-img_size//2, img_size, img_size)
             pg.draw.rect(screen, (0,120,255), rect, width=3, border_radius=8)
 
+    # bouton reroll
     rr = big.render("Redraw (R)", True, (60,60,60))
-    uu = big.render("Use Object (U)", True, (80,200,120))
     screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 340)))
-    screen.blit(uu, uu.get_rect(center=(x0 + SIDEBAR_W//2, 400)))
+
 
 # ===========
 #  GAME OVER
@@ -833,7 +848,7 @@ def main():
                             step_flash_time = 1.0
 
                             # victoire : entrée dans l’antichambre
-                            
+
                             if (player.ligne, player.colonne) == ANTI_POS:
                                 state = UIState.WIN
                                 continue
@@ -928,7 +943,7 @@ def main():
                         state = UIState.PLAYING
                         last_message = f"Le joueur a depense {cost} gemmes !"
             draw_board(screen, room_grid, player, img_entree, img_anti, None)
-            draw_draft(screen, font, big, draft_list, focus_idx)
+            draw_draft(screen, font, big, draft_list, focus_idx, icons)
             pg.display.flip()
             clock.tick(FPS)
 
