@@ -610,12 +610,7 @@ class Rooms:
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
 
         "NURSERY": RoomSpec(key="NURSERY", name="Nursery", desc="Whenever you draft a Bedroom, gain 5 steps.",
-<<<<<<< HEAD
-            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common",
-            cost_gems=1),
-=======
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common",cost_gems=1),
->>>>>>> fe8946914ce5e314af58b7294a56c796be122bd3
 
         "SERVANTS_QUARTERS": RoomSpec(key="SERVANTS_QUARTERS", name="Servant's Quarters", desc="+1 step for each Bedroom in your house.",
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Unusual", cost_gems=1),
@@ -714,6 +709,95 @@ class Rooms:
             tags=("garden","spread"),
             rarity_label="Rare",
         ),
+
+        # Yellow Rooms
+
+        "COMMISSARY": RoomSpec(
+            key="COMMISSARY",
+            name="Commissary",
+            desc="Items for sale.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Standard",
+            cost_gems=1,
+        ),
+
+        "KITCHEN": RoomSpec(
+            key="KITCHEN",
+            name="Kitchen",
+            desc="Food for sale.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Common",
+            cost_gems=1,
+        ),
+
+        "LOCKSMITH": RoomSpec(
+            key="LOCKSMITH",
+            name="Locksmith",
+            desc="Keys for sale.",
+            shape=RoomShape.DEAD_END,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Unusual",
+            cost_gems=1,
+        ),
+
+        "SHOWROOM": RoomSpec(
+            key="SHOWROOM",
+            name="Showroom",
+            desc="Luxury items for sale.",
+            shape=RoomShape.STRAIGHT,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Rare",
+            cost_gems=2,
+        ),
+
+        "LAUNDRY_ROOM_YELLOW": RoomSpec(
+            key="LAUNDRY_ROOM_YELLOW",
+            name="Laundry Room",
+            desc="Allows laundering currency.",
+            shape=RoomShape.DEAD_END,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Rare",
+            cost_gems=1,
+        ),
+
+        "BOOKSHOP": RoomSpec(
+            key="BOOKSHOP",
+            name="Bookshop",
+            desc="Books for sale.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Rare",
+            cost_gems=1,
+        ),
+
+        "ARMORY": RoomSpec(
+            key="ARMORY",
+            name="The Armory",
+            desc="Weapons and armor for sale.",
+            shape=RoomShape.L_SHAPE,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Standard",
+        ),
+
+        "GIFT_SHOP": RoomSpec(
+            key="GIFT_SHOP",
+            name="Gift Shop",
+            desc="Souvenirs for sale.",
+            shape=RoomShape.T_SHAPE,
+            color=RoomColor.YELLOW,
+            tags=("shop",),
+            rarity_label="Rare",
+        ),
+
 
 
     }
