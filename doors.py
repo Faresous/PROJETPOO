@@ -569,7 +569,7 @@ class Rooms:
             desc="A four-way crossing hallway.", shape=RoomShape.FOUR_WAY,
             color=RoomColor.ORANGE, tags=("blueprint",), rarity_label="Common",cost_gems=2),
 
-        # bedrooms
+        # Hallways 
         "HALLWAY": RoomSpec(key="HALLWAY", name="Hallway", desc="Basic corridor.",
             shape=RoomShape.T_SHAPE, color=RoomColor.ORANGE, tags=("blueprint","hallway"),
             rarity_label="Common"),
@@ -598,6 +598,33 @@ class Rooms:
         "CORRIDOR": RoomSpec(key="CORRIDOR", name="CORRIDOR",
             desc="Always left unlocked.", shape=RoomShape.STRAIGHT, color=RoomColor.ORANGE,
             tags=("blueprint","hallway"), rarity_label="Common"),
+        
+        # bedrooms 
+        "BEDROOM": RoomSpec(key="BEDROOM", name="Bedroom", desc="Whenever you enter this room, gain 2 steps.",
+            shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
+
+        "BOUDOIR": RoomSpec(key="BOUDOIR", name="Boudoir", desc="Classic boudoir room.",
+            shape=RoomShape.L_SHAPE, color=RoomColor.VIOLET, tags=("bedroom", "boudoir"), rarity_label="Standard"),
+
+        "GUEST_BEDROOM": RoomSpec(key="GUEST_BEDROOM", name="Guest Bedroom", desc="+10 steps when entering this room.",
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
+
+        "NURSERY": RoomSpec(key="NURSERY", name="Nursery", desc="Whenever you draft a Bedroom, gain 5 steps.",
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common"
+            cost_gems=1),
+
+        "SERVANTS_QUARTERS": RoomSpec(key="SERVANTS_QUARTERS", name="Servant's Quarters", desc="+1 step for each Bedroom in your house.",
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Unusual", cost_gems=1),
+
+        "BUNK_ROOM": RoomSpec(key="BUNK_ROOM", name="Bunk Room", desc="Counts as 2 Bedrooms.", shape=RoomShape.DEAD_END,
+            color=RoomColor.VIOLET, tags=("bedroom","double"), rarity_label="Unusual"),
+
+        "HER_LADYSHIPS_CHAMBER": RoomSpec(key="HER_LADYSHIPS_CHAMBER", name="Her Ladyship's Chamber", desc="Boosts Boudoir and Walk-In Closet effects.",
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","boost"), rarity_label="Rare"),
+
+        "MASTER_BEDROOM": RoomSpec(key="MASTER_BEDROOM", name="Master Bedroom", desc="+1 step for each room in your house.",
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Rare", cost_gems=2),
+
     }
 
 
