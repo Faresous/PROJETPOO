@@ -564,6 +564,40 @@ class Rooms:
         "ROOM_46": RoomSpec(key="ROOM_46", name="Room 46",
             desc="Objectif du jeu. Couronne royale.", shape=RoomShape.SPECIAL,
             color=RoomColor.BLUE, tags=("goal",), rarity_label="Rumored"),
+
+               "PASSAGEWAY": RoomSpec(key="PASSAGEWAY", name="Passageway",
+            desc="A four-way crossing hallway.", shape=RoomShape.FOUR_WAY,
+            color=RoomColor.ORANGE, tags=("blueprint",), rarity_label="Common",cost_gems=2),
+
+        # bedrooms
+        "HALLWAY": RoomSpec(key="HALLWAY", name="Hallway", desc="Basic corridor.",
+            shape=RoomShape.T_SHAPE, color=RoomColor.ORANGE, tags=("blueprint","hallway"),
+            rarity_label="Common"),
+        
+        "EAST_WING_HALL": RoomSpec(key="EAST_WING_HALL", name="East Wing Hall",
+            desc="A long hallway.", shape=RoomShape.T_SHAPE, color=RoomColor.ORANGE,
+            tags=("blueprint","hallway"), rarity_label="Unusual"),
+
+        "FOYER": RoomSpec(key="FOYER", name="Foyer", desc="Hallway doors are always unlocked.",
+            shape=RoomShape.STRAIGHT, color=RoomColor.ORANGE, tags=("blueprint","hallway"),
+            rarity_label="Unusual", cost_gems=2),
+        
+        "SECRET_PASSAGE": RoomSpec(key="SECRET_PASSAGE", name="Secret Passage",
+            desc="Leads to a room of a color of your choice.", shape=RoomShape.DEAD_END,
+            color=RoomColor.ORANGE, tags=("blueprint","special"), rarity_label="Unusual",
+            cost_gems=1),
+        
+        "WEST_WING_HALL": RoomSpec(key="WEST_WING_HALL", name="West Wing Hall",
+            desc="A long hallway.", shape=RoomShape.T_SHAPE, color=RoomColor.ORANGE,
+            tags=("blueprint","hallway"), rarity_label="Standard"),
+
+        "GREAT_HALL": RoomSpec(key="GREAT_HALL", name="Great Hall",
+            desc="Hall that contains 7 locked doors.", shape=RoomShape.FOUR_WAY, color=RoomColor.ORANGE,
+            tags=("blueprint","hallway"), rarity_label="Unusual"),
+
+        "CORRIDOR": RoomSpec(key="CORRIDOR", name="CORRIDOR",
+            desc="Always left unlocked.", shape=RoomShape.STRAIGHT, color=RoomColor.ORANGE,
+            tags=("blueprint","hallway"), rarity_label="Common"),
     }
 
 
