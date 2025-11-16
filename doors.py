@@ -429,7 +429,8 @@ class Rooms:
         # 001–012
         "FOUNDATION": RoomSpec(key="FOUNDATION", name="Foundation",
             desc="Pièce permanente avec accès au sous-sol.", shape=RoomShape.T_SHAPE,
-            color=RoomColor.BLUE, tags=("blueprint","permanent"), rarity_label="Rare", cost_gems=0),
+            color=RoomColor.BLUE, tags=("blueprint","permanent"), rarity_label="Rare", cost_gems=0,
+            effects={"dig_spots": True}),
 
         "ENTRANCE_HALL": RoomSpec(key="ENTRANCE_HALL", name="Entrance Hall",
             desc="Point de départ quotidien. Trois portes.", shape=RoomShape.T_SHAPE,
@@ -941,4 +942,9 @@ class Rooms:
         doors = Doors.make_for_shape(spec.shape, row, rotation, rng)
         room = Room(spec=spec, rotation=rotation,doors=doors, effects=spec.effects.copy())
         room.on_enter(rng)
+        if spec.effects and spec.effects.get("dig_spots"):
+            nb = random.randint(2, 5)
+
+            # Ajouter nb endroits où creuser dans room.effects
+            room.effects["interactifs"] = [endroits_ou_creuser() for _ in range(nb)]
         return room
