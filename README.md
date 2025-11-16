@@ -2,7 +2,7 @@
 
 Une implémentation simplifiée du jeu Blue Prince, réalisée dans le cadre d'un projet de Programmation Orientée Objet (POO).
 
-Ce jeu est un  d'explorateur de manoir où le joueur construit pièce par pièce, gère ses ressources (pas, clés, gemmes) et tente d'atteindre l'Antichambre en partant de la chambre d'entrée.
+Ce jeu permet au joueur d'être dans la peau d'un d'explorateur de manoir qui construit pièce par pièce, gère ses ressources (pas, clés, gemmes) et tente d'atteindre l'Antichambre en partant de la chambre d'entrée.
 
 
 ## 📋 Prérequis
