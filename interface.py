@@ -386,7 +386,7 @@ def reroll_draft(row: int, col: int, player: joueur, draft_list,pioche: list, en
     return draft_three_rooms(row, col, entrance_dir, pioche), True
 
 def apply_room_loot(player: joueur, room: Room):
-    """ Applique effets immédiats : gemmes, pas, malus. """
+    """ Applique effets immédiats : gemmes, pas, or, malus. """
     eff = room.effects
 
     if "regain_steps" in eff:
@@ -405,7 +405,13 @@ def apply_room_loot(player: joueur, room: Room):
         player.pas -= s
         return f"You lose {s} step(s)."
 
+    if "loot_coins" in eff:
+        coins = eff["loot_coins"]
+        player.add_item("orr", coins)
+        return f"You gain {coins} coin(s)."
+
     return None
+
 
 def room_has_opening(spec, orientation):
     """Retourne True si la salle possède une porte dans l'orientation demandée."""
@@ -740,7 +746,7 @@ def draw_interact_menu(screen, font, big, interact_list, focus_idx):
     w = 300
     
     total_h = (len(interact_list) * h) + 40
-    y0 = H // 2 - (total_h // 2)
+    y0 = H // 2 - (total_h // 2) + 80
     
     menu_rect = pg.Rect(x0 - w//2, y0, w, total_h)
     pg.draw.rect(screen, BG2, menu_rect, border_radius=10) 

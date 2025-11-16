@@ -135,6 +135,7 @@ class RoomSpec:
     cost_gems: Optional[int] = None
     door_behavior: Optional[str] = None
     exits: Optional[int] = None
+    effects: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -515,7 +516,8 @@ class Rooms:
 
         "VAULT": RoomSpec(key="VAULT", name="Vault",
             desc="Dead-end: 40 pièces. Coffres numérotés.", shape=RoomShape.DEAD_END,
-            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3),
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3,
+            effects={"loot_coins": 40}),
 
         "OFFICE": RoomSpec(key="OFFICE", name="Office",
             desc="Terminal: paie, email, diffusion de pièces.", shape=RoomShape.L_SHAPE,
@@ -931,6 +933,6 @@ class Rooms:
         rng = rng or random.Random()
         spec = Rooms.ROOMS_DB[spec_key]
         doors = Doors.make_for_shape(spec.shape, row, rotation, rng)
-        room = Room(spec=spec, rotation=rotation,doors=doors, effects={})
+        room = Room(spec=spec, rotation=rotation,doors=doors, effects=spec.effects.copy())
         room.on_enter(rng)
         return room
