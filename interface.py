@@ -604,6 +604,10 @@ def draw_draft(screen, font, big, draft_list, focus_idx, icons):
     rr = big.render("Redraw (R)", True, (60,60,60))
     screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 340)))
 
+    # bouton utiliser
+    uu = big.render("Use Object (U)", True, (80,200,120))
+    screen.blit(uu, uu.get_rect(center=(x0 + SIDEBAR_W//2, 400)))
+
 
 # ===========
 #  GAME OVER
