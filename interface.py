@@ -147,12 +147,12 @@ def draw_main_menu(screen, big, font, bg_img, focus_idx):
         screen.blit(dark, (0, 0))
 
     cx = screen.get_width() // 2
-    title = big.render("BluePrince", True, TEXT_DARK)
-    subtitle = font.render("Choisissez une action", True, MUTED)
-    screen.blit(title, title.get_rect(center=(cx, 140)))
-    screen.blit(subtitle, subtitle.get_rect(center=(cx, 190)))
+    # title = big.render("BluePrince", True, TEXT_DARK)
+    # subtitle = font.render("Choisissez une action", True, MUTED)
+    # screen.blit(title, title.get_rect(center=(cx, 140)))
+    # screen.blit(subtitle, subtitle.get_rect(center=(cx, 190)))
 
-    rects = _button_rects(center_x=cx, start_y=260)
+    rects = _button_rects(center_x=cx, start_y=400)
     labels = ["Nouvelle partie", "Charger", "Options", "Quitter"]
 
     mx, my = pg.mouse.get_pos()
@@ -182,7 +182,7 @@ def draw_pill_button(screen, rect, hovered):
     screen.blit(btn, rect.topleft)
 
 
-def run_main_menu(screen, big, font, clock, assets_dir):
+def run_main_menu(screen,surface, big, font, clock, assets_dir,monitor_size):
     """
     Affiche et gère le menu principal du jeu.
     """
@@ -214,22 +214,51 @@ def run_main_menu(screen, big, font, clock, assets_dir):
                     return act if isinstance(act, UIState) else UIState.MENU
 
             if event.type == pg.MOUSEMOTION:
-                rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
+                rects = _button_rects(center_x=surface.get_width() // 2, start_y=260)
                 for i, r in enumerate(rects):
                     if r.collidepoint(event.pos):
                         focus_idx = i
                         break
 
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                rects = _button_rects(center_x=screen.get_width() // 2, start_y=260)
+                rects = _button_rects(center_x=surface.get_width() // 2, start_y=260)
                 for i, r in enumerate(rects):
                     if r.collidepoint(event.pos):
                         act = actions[i]
                         return act if isinstance(act, UIState) else UIState.MENU
 
-        draw_main_menu(screen, big, font, bg_img, focus_idx)
+        draw_main_menu(surface, big, font, bg_img, focus_idx)
+        MONITOR_W, MONITOR_H = monitor_size
+        scaled_surface = pg.transform.smoothscale(surface, (MONITOR_W, MONITOR_H))
+        screen.blit(scaled_surface, (0, 0))
         pg.display.flip()
         clock.tick(FPS)
+
+def scale_and_blit(screen, v_screen, monitor_size):
+    """
+    Met à l'échelle l'écran virtuel (v_screen) pour qu'il s'adapte au moniteur (screen)
+    en gardant ses proportions (ajoute des bandes noires).
+    """
+    MONITOR_W, MONITOR_H = monitor_size
+    W, H = v_screen.get_size() # Taille de l'écran virtuel (1060x684)
+
+    scale = min(MONITOR_W / W, MONITOR_H / H)
+    new_w = int(W * scale)
+    new_h = int(H * scale)
+    
+    # Calcule la position centrée pour les bandes noires
+    new_x = (MONITOR_W - new_w) // 2
+    new_y = (MONITOR_H - new_h) // 2
+    
+    # Met à l'échelle
+    scaled_surface = pg.transform.smoothscale(v_screen, (new_w, new_h))
+    
+    # Remplit le fond de l'écran (les bandes noires)
+    screen.fill(BG2)
+    
+    screen.blit(scaled_surface, (new_x, new_y))
+    pg.display.flip()
+
 
 
 def _run_options(screen, font, big, clock):
@@ -706,7 +735,10 @@ def main():
 
     pg.init()
     init_music()
-    screen = pg.display.set_mode((W,H))
+    screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
+    MONITOR_W, MONITOR_H = screen.get_size()
+    v_screen = pg.Surface((W, H))
+    
     pg.display.set_caption("Blue Prince — Jeux + Inventaire")
     clock = pg.time.Clock()
     font = pg.font.SysFont(None,24)
@@ -757,8 +789,8 @@ def main():
 
         # ------------ GAME OVER ----------------
         if state == UIState.GAME_OVER:
-            draw_game_over(screen, font, big)
-            pg.display.flip()
+            draw_game_over(v_screen, font, big)
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
 
             for e in pg.event.get():
                 if e.type == pg.QUIT:
@@ -772,8 +804,8 @@ def main():
 
         # ------------ WINNER ----------------
         if state == UIState.WIN:
-            draw_win(screen, font, big)
-            pg.display.flip()
+            draw_win(v_screen, font, big)
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
 
             for e in pg.event.get():
                 if e.type == pg.QUIT:
@@ -787,7 +819,7 @@ def main():
 
         # ------------ MENU ----------------
         if state == UIState.MENU:
-            choice = run_main_menu(screen, big, font, clock, ASSETS)
+            choice = run_main_menu(screen, v_screen, big, font, clock, ASSETS, (MONITOR_W, MONITOR_H))
             if choice == UIState.PLAYING:
                 state = UIState.PLAYING
                 continue
@@ -953,13 +985,13 @@ def main():
                 clock.tick(FPS)
                 continue
 
-            draw_board(screen, room_grid, player, img_entree, img_anti, active_direction)
+            draw_board(v_screen, room_grid, player, img_entree, img_anti, active_direction)
             
             current_room = room_grid[player.ligne][player.colonne]
             name = current_room.spec.name if current_room else "Unknown room"
 
-            draw_sidebar(screen, font, big, player, name, icons, last_message, step_flash, step_flash_time)
-            pg.display.flip()
+            draw_sidebar(v_screen, font, big, player, name, icons, last_message, step_flash, step_flash_time)
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
             clock.tick(FPS)
   
         # ------------ DRAFT ----------------
@@ -1006,9 +1038,9 @@ def main():
                         last_message = msg
                         state = UIState.PLAYING
                         last_message = f"Le joueur a depense {cost} gemmes !"
-            draw_board(screen, room_grid, player, img_entree, img_anti, None)
-            draw_draft(screen, font, big, draft_list, focus_idx, icons)
-            pg.display.flip()
+            draw_board(v_screen, room_grid, player, img_entree, img_anti, None)
+            draw_draft(v_screen, font, big, draft_list, focus_idx, icons)
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
             clock.tick(FPS)
 
         if state == UIState.QUITTING:
