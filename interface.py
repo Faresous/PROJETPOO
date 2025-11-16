@@ -836,10 +836,10 @@ def main():
                         
                         if spec in pioche:
                             pioche.remove(spec)
-                        
+
                         room = Rooms.generate_room(spec.key, row=player.ligne, rotation=rotation)
                         room_grid[player.ligne][player.colonne] = room
-                        last_message = f"Le joueur a depense {cost} gemmes !"
+                        
                         
                         msg = apply_room_loot(player, room)
                         if msg and msg.startswith("You gain"):
@@ -849,7 +849,7 @@ def main():
 
                         last_message = msg
                         state = UIState.PLAYING
-
+                        last_message = f"Le joueur a depense {cost} gemmes !"
             draw_board(screen, room_grid, player, img_entree, img_anti, None)
             draw_draft(screen, font, big, draft_list, focus_idx)
             pg.display.flip()

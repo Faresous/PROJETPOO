@@ -610,8 +610,12 @@ class Rooms:
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom",), rarity_label="Common"),
 
         "NURSERY": RoomSpec(key="NURSERY", name="Nursery", desc="Whenever you draft a Bedroom, gain 5 steps.",
+<<<<<<< HEAD
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common",
             cost_gems=1),
+=======
+            shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","draft_effect"), rarity_label="Common",cost_gems=1),
+>>>>>>> fe8946914ce5e314af58b7294a56c796be122bd3
 
         "SERVANTS_QUARTERS": RoomSpec(key="SERVANTS_QUARTERS", name="Servant's Quarters", desc="+1 step for each Bedroom in your house.",
             shape=RoomShape.DEAD_END, color=RoomColor.VIOLET, tags=("bedroom","synergy"), rarity_label="Unusual", cost_gems=1),
