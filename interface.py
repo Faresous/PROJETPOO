@@ -7,7 +7,7 @@ import sys
 import pygame as pg
 import random
 from enum import Enum
-from doors import Rooms, Doors, Orientation, Room
+from doors import Rooms, Doors, Orientation, Room, DoorState
 from joueur import joueur
 from objets import (
     objetpermanent,
@@ -1012,10 +1012,20 @@ def main():
                             state = UIState.GAME_OVER
                             active_direction = None
                             continue
-                        
+                    
                         if player.pas <= 0:
                             state = UIState.GAME_OVER
                             continue
+                        
+                        new_r, new_c = player.ligne, player.colonne
+                        new_room = room_grid[new_r][new_c]
+                        
+                        if new_room: # S'assure que la nouvelle salle existe
+                            opposite_dir = get_opposite_dir(dir)
+                            return_door = new_room.doors.get(opposite_dir)
+                            if return_door:
+                                # On force l'ouverture, car on vient de la passer
+                                return_door.state = DoorState.UNLOCKED
 
                         # nouvelle salle
                         if room_grid[player.ligne][player.colonne] is None:
@@ -1086,7 +1096,12 @@ def main():
                         room = Rooms.generate_room(spec.key, row=player.ligne, rotation=rotation)
                         room_grid[player.ligne][player.colonne] = room
                         
+                        opposite_dir = get_opposite_dir(entrance_direction_for_draft)
+                        return_door = room.doors.get(opposite_dir)
                         
+                        if return_door:
+                            return_door.state = DoorState.UNLOCKED
+                            
                         msg = apply_room_loot(player, room)
                         if msg and msg.startswith("You gain"):
                             gain = int(msg.split()[2])
