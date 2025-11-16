@@ -64,7 +64,7 @@ class Detecteur_de_metaux(objetpermanent):
     """
     def __init__(self):
         super().__init__(
-            nom="Detecteur de metaux",
+            nom="Detecteur de meteaux",
             description="Augmente les chances de trouver des clés et pièces"
         )
         

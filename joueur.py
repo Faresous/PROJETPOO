@@ -56,7 +56,7 @@ class joueur:
             True si l'ajout a bien été fait, False sinon
         """
         
-        items = {'Pelle', 'Marteau', 'Kit de crochetage', 'Detecteur de méteaux', 'Patte de lapin'}
+        items = {'Pelle', 'Marteau', 'Kit de crochetage', 'Detecteur de meteaux', 'Patte de lapin'}
         
         # Si la quatité est pas un entier ou si elle est négative : ERREUR !!
         if not isinstance(quantite, int) :
@@ -76,7 +76,7 @@ class joueur:
                 elif item == 'Kit de crochetage':
                     self.objet_permanents[item] = Kit_de_crochetage()
                     
-                elif item == 'Detecteur de méteaux':
+                elif item == 'Detecteur de meteaux':
                     self.objet_permanents[item] = Detecteur_de_metaux()
                     
                 elif item == 'Patte de lapin':
@@ -108,7 +108,7 @@ class joueur:
         inventaire["pelle"] = 1 if "Pelle" in self.objet_permanents else 0
         inventaire["marteau"] = 1 if "Marteau" in self.objet_permanents else 0
         inventaire["kit de crochetage"] = 1 if "Kit de crochetage" in self.objet_permanents else 0
-        inventaire["detecteur de méteaux"] = 1 if "Detecteur de méteaux" in self.objet_permanents else 0
+        inventaire["detecteur de meteaux"] = 1 if "Detecteur de meteaux" in self.objet_permanents else 0
         inventaire["patte de lapin"] = 1 if "Patte de lapin" in self.objet_permanents else 0
         
     def utiliser_objet(self, objet):

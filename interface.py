@@ -524,14 +524,14 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
         "clés": player.cles,
         "dés": player.des,
         "pelle": 1 if "Pelle" in player.objet_permanents else 0,
-        "detecteur de méteaux": 1 if "Detecteur de méteaux" in player.objet_permanents else 0,
+        "detecteur de meteaux": 1 if "Detecteur de meteaux" in player.objet_permanents else 0,
         "patte de lapin": 1 if "Patte de lapin" in player.objet_permanents else 0,
         "kit de crochetage": 1 if "Kit de crochetage" in player.objet_permanents else 0,
         "marteau": 1 if "Marteau" in player.objet_permanents else 0,
     }
 
     permanents = [
-        ("pelle","Pelle"), ("detecteur de méteaux","Détecteur"),
+        ("pelle","Pelle"), ("detecteur de meteaux","Détecteur"),
         ("patte de lapin","Patte de lapin"), ("kit de crochetage","KC"),
         ("marteau","Marteau")
     ]
@@ -721,7 +721,7 @@ def main():
 
     icons = {
         "pelle": opt_obj("shovel.png"),
-        "detecteur de méteaux": opt_obj("metal-detector.png"),
+        "detecteur de meteaux": opt_obj("metal-detector.png"),
         "patte de lapin": opt_obj("rabbit_foot.png"),
         "kit de crochetage": opt_obj("lockpick.png"),
         "marteau": opt_obj("hammer.png"),
