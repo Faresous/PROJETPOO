@@ -234,30 +234,56 @@ def run_main_menu(screen,surface, big, font, clock, assets_dir,monitor_size):
         pg.display.flip()
         clock.tick(FPS)
 
-def scale_and_blit(screen, v_screen, monitor_size):
+def scale_and_blit(screen, v_screen, monitor_size, border_texture=None):
     """
-    Met à l'échelle l'écran virtuel (v_screen) pour qu'il s'adapte au moniteur (screen)
-    en gardant ses proportions (ajoute des bandes noires).
+    Centre l'écran virtuel sur le moniteur,
+    ajoute une texture dans les bandes noires autour,
     """
-    MONITOR_W, MONITOR_H = monitor_size
-    W, H = v_screen.get_size() # Taille de l'écran virtuel (1060x684)
+    MON_W, MON_H = monitor_size
+    W, H = v_screen.get_size()
 
-    scale = min(MONITOR_W / W, MONITOR_H / H)
+    scale = min(MON_W / W, MON_H / H)
     new_w = int(W * scale)
     new_h = int(H * scale)
-    
-    # Calcule la position centrée pour les bandes noires
-    new_x = (MONITOR_W - new_w) // 2
-    new_y = (MONITOR_H - new_h) // 2
-    
-    # Met à l'échelle
-    scaled_surface = pg.transform.smoothscale(v_screen, (new_w, new_h))
-    
-    # Remplit le fond de l'écran (les bandes noires)
-    screen.fill(BG2)
-    
-    screen.blit(scaled_surface, (new_x, new_y))
+
+    # Position centrée de l’interface
+    x = (MON_W - new_w) // 2
+    y = (MON_H - new_h) // 2
+
+    # Efface l’écran
+    screen.fill((0, 0, 0))
+
+    # === Appliquer fond mural UNIQUEMENT dans les bandes noires ===
+    if border_texture:
+        tex_w, tex_h = border_texture.get_size()
+
+        # Zone AU-DESSUS
+        for yy in range(0, y, tex_h):
+            for xx in range(0, MON_W, tex_w):
+                screen.blit(border_texture, (xx, yy))
+
+        # Zone EN-DESSOUS
+        bottom_h = MON_H - (y + new_h)
+        for yy in range(y + new_h, MON_H, tex_h):
+            for xx in range(0, MON_W, tex_w):
+                screen.blit(border_texture, (xx, yy))
+
+        # Zone GAUCHE
+        for yy in range(y, y + new_h, tex_h):
+            for xx in range(0, x, tex_w):
+                screen.blit(border_texture, (xx, yy))
+
+        # Zone DROITE
+        for yy in range(y, y + new_h, tex_h):
+            for xx in range(x + new_w, MON_W, tex_w):
+                screen.blit(border_texture, (xx, yy))
+
+    # === Affiche l'écran virtuel AU CENTRE ===
+    scaled = pg.transform.smoothscale(v_screen, (new_w, new_h))
+    screen.blit(scaled, (x, y))
+
     pg.display.flip()
+
 
 
 
@@ -748,6 +774,9 @@ def main():
     font = pg.font.SysFont(None,24)
     big  = pg.font.SysFont(None,28)
 
+    # chargement image de brick
+    brick_texture = load_png("bluep.jpg", 200)  
+
     # AJOUT : chargement images des salles
     load_room_images()
 
@@ -794,7 +823,7 @@ def main():
         # ------------ GAME OVER ----------------
         if state == UIState.GAME_OVER:
             draw_game_over(v_screen, font, big)
-            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H), border_texture=brick_texture)
 
             for e in pg.event.get():
                 if e.type == pg.QUIT:
@@ -809,7 +838,7 @@ def main():
         # ------------ WINNER ----------------
         if state == UIState.WIN:
             draw_win(v_screen, font, big)
-            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H), border_texture=brick_texture)
 
             for e in pg.event.get():
                 if e.type == pg.QUIT:
@@ -995,7 +1024,7 @@ def main():
             name = current_room.spec.name if current_room else "Unknown room"
 
             draw_sidebar(v_screen, font, big, player, name, icons, last_message, step_flash, step_flash_time)
-            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H), border_texture=brick_texture)
             clock.tick(FPS)
   
         # ------------ DRAFT ----------------
@@ -1044,7 +1073,7 @@ def main():
                         last_message = f"Le joueur a depense {cost} gemmes !"
             draw_board(v_screen, room_grid, player, img_entree, img_anti, None)
             draw_draft(v_screen, font, big, draft_list, focus_idx, icons)
-            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H))
+            scale_and_blit(screen, v_screen, (MONITOR_W, MONITOR_H), border_texture=brick_texture)
             clock.tick(FPS)
 
         if state == UIState.QUITTING:
