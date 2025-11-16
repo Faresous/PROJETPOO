@@ -384,7 +384,7 @@ class Rooms:
 
         "ENTRANCE_HALL": RoomSpec(key="ENTRANCE_HALL", name="Entrance Hall",
             desc="Point de départ quotidien. Trois portes.", shape=RoomShape.T_SHAPE,
-            color=RoomColor.ORANGE, tags=("permanent","blueprint"), rarity_label="N/A", cost_gems=0),
+            color=RoomColor.BLUE, tags=("permanent","blueprint"), rarity_label="N/A", cost_gems=0),
 
         "SPARE_ROOM": RoomSpec(key="SPARE_ROOM", name="Spare Room",
             desc="Salle neutre pouvant être améliorée.", shape=RoomShape.STRAIGHT,
@@ -396,15 +396,15 @@ class Rooms:
 
         "PARLOR": RoomSpec(key="PARLOR", name="Parlor",
             desc="Puzzle du salon.", shape=RoomShape.L_SHAPE,
-            color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
+            color=RoomColor.BLUE, tags=("blueprint","puzzle"), rarity_label="Common"),
 
         "BILLIARD_ROOM": RoomSpec(key="BILLIARD_ROOM", name="Billiard Room",
             desc="Puzzle de fléchettes.", shape=RoomShape.L_SHAPE,
-            color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
+            color=RoomColor.BLUE, tags=("blueprint","puzzle"), rarity_label="Common"),
 
         "GALLERY": RoomSpec(key="GALLERY", name="Gallery",
             desc="Galerie, liée à Room 8.", shape=RoomShape.STRAIGHT,
-            color=RoomColor.VIOLET, tags=("blueprint","puzzle"), rarity_label="Common"),
+            color=RoomColor.BLUE, tags=("blueprint","puzzle"), rarity_label="Common"),
 
         "ROOM_8": RoomSpec(key="ROOM_8", name="Room 8",
             desc="Pièce verrouillée par la clé Room 8.", shape=RoomShape.L_SHAPE,
@@ -449,7 +449,7 @@ class Rooms:
 
         "WINE_CELLAR": RoomSpec(key="WINE_CELLAR", name="Wine Cellar",
             desc="Toujours 3 gemmes. Dead-end.", shape=RoomShape.DEAD_END,
-            color=RoomColor.GREEN, tags=("blueprint","dead_end"), rarity_label="Commonplace"),
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Commonplace"),
 
         "TROPHY_ROOM": RoomSpec(key="TROPHY_ROOM", name="Trophy Room",
             desc="Musée des trophées. 8 gemmes.", shape=RoomShape.L_SHAPE,
@@ -469,11 +469,11 @@ class Rooms:
 
         "VAULT": RoomSpec(key="VAULT", name="Vault",
             desc="Dead-end: 40 pièces. Coffres numérotés.", shape=RoomShape.DEAD_END,
-            color=RoomColor.GREEN, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3),
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Rare", cost_gems=3),
 
         "OFFICE": RoomSpec(key="OFFICE", name="Office",
             desc="Terminal: paie, email, diffusion de pièces.", shape=RoomShape.L_SHAPE,
-            color=RoomColor.YELLOW, tags=("blueprint","spread","terminal"), rarity_label="Standard", cost_gems=2),
+            color=RoomColor.BLUE, tags=("blueprint","spread","terminal"), rarity_label="Standard", cost_gems=2),
 
         # 025–036
         "DRAWING_ROOM": RoomSpec(key="DRAWING_ROOM", name="Drawing Room",
@@ -490,11 +490,11 @@ class Rooms:
 
         "CHAMBER_OF_MIRRORS": RoomSpec(key="CHAMBER_OF_MIRRORS", name="Chamber of Mirrors",
             desc="Autorise un second exemplaire de salles. Récompense permanente.", shape=RoomShape.DEAD_END,
-            color=RoomColor.RED, tags=("blueprint","puzzle"), rarity_label="Unusual"),
+            color=RoomColor.BLUE, tags=("blueprint","puzzle"), rarity_label="Unusual"),
 
         "THE_POOL": RoomSpec(key="THE_POOL", name="The Pool",
             desc="Ajoute Locker Room, Sauna, Pump Room au pool du jour.", shape=RoomShape.T_SHAPE,
-            color=RoomColor.GREEN, tags=("blueprint",), rarity_label="Standard"),
+            color=RoomColor.BLUE, tags=("blueprint",), rarity_label="Standard"),
 
         "DRAFTING_STUDIO": RoomSpec(key="DRAFTING_STUDIO", name="Drafting Studio",
             desc="Ajoute définitivement un floorplan au pool.", shape=RoomShape.STRAIGHT,
@@ -527,11 +527,11 @@ class Rooms:
         # 037–046
         "SAUNA": RoomSpec(key="SAUNA", name="Sauna",
             desc="Demain: +20 pas. Dead-end.", shape=RoomShape.DEAD_END,
-            color=RoomColor.VIOLET, tags=("blueprint","dead_end"), rarity_label="Standard"),
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Standard"),
 
         "COAT_CHECK": RoomSpec(key="COAT_CHECK", name="Coat Check",
             desc="Dépose un objet pour le récupérer un autre jour. Dead-end.", shape=RoomShape.DEAD_END,
-            color=RoomColor.YELLOW, tags=("blueprint","dead_end"), rarity_label="Standard"),
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Standard"),
 
         "MAIL_ROOM": RoomSpec(key="MAIL_ROOM", name="Mail Room",
             desc="Lettre livrée le lendemain. Dead-end.", shape=RoomShape.DEAD_END,
@@ -539,7 +539,7 @@ class Rooms:
 
         "FREEZER": RoomSpec(key="FREEZER", name="Freezer",
             desc="Fige comptes jusqu’au lendemain. Dead-end.", shape=RoomShape.DEAD_END,
-            color=RoomColor.RED, tags=("blueprint","dead_end"), rarity_label="Standard"),
+            color=RoomColor.BLUE, tags=("blueprint","dead_end"), rarity_label="Standard"),
 
         "DINING_ROOM": RoomSpec(key="DINING_ROOM", name="Dining Room",
             desc="À rang 8: consommer le plat pour +20/30 pas.", shape=RoomShape.T_SHAPE,
@@ -563,7 +563,7 @@ class Rooms:
             
         "ROOM_46": RoomSpec(key="ROOM_46", name="Room 46",
             desc="Objectif du jeu. Couronne royale.", shape=RoomShape.SPECIAL,
-            color=RoomColor.VIOLET, tags=("goal",), rarity_label="Rumored"),
+            color=RoomColor.BLUE, tags=("goal",), rarity_label="Rumored"),
     }
 
 
