@@ -119,12 +119,12 @@ class objets_insolites(objet) :
         
     def utiliser(self, joueur):
         if self.valeur <= 0:
-            return f"{self.nom} est déjà mangé."
+            return f"{self.nom} a déjà été mangé."
         reward = self.valeur
         
         if joueur.add_item("pas", self.valeur):
             self.valeur = 0
-            return f"Vous mangez {self.nom} et regagnez +{reward} pas!"
+            return f"Miam ! Vous avez mangez {self.nom} et regagnez +{reward} pas!"
             
     
 class Pomme(objets_insolites):

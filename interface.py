@@ -783,7 +783,31 @@ def draw_interact_menu(screen, font, big, interact_list, focus_idx):
     current_y = y0 + 50
     for i, (action, item) in enumerate(interact_list):
         
-        text = f"{action} {item.nom}"
+        display_action = action # ("Ramasser" ou "Utiliser" par défaut)
+        display_name = item.nom
+        
+        if action == "Utiliser":
+            if item.nom == "Coffre":
+                display_action = "Ouvrir"
+                display_name = "le coffre"
+            elif item.nom == "Casier":
+                display_action = "Ouvrir"
+                display_name = "le casier"
+            elif item.nom == "Endroit à creuser":
+                display_action = "Creuser"
+                display_name = "l'endroit"
+                
+        elif action == "Ramasser":
+            
+            # Si c'est de la nourriture
+            if item.nom in ["Pomme", "Banane", "Gateau", "Sandwich", "Repas"]:
+                display_action = "Manger"
+                
+            # Si c'est un objet permanent 
+            else:
+                display_action = "Ramasser"
+
+        text = f"{display_action} {display_name}"      
         color = (0, 150, 255) if i == focus_idx else WHITE
         
         txt = font.render(text, True, color)
