@@ -367,10 +367,12 @@ class Doors:
         0: commun, 1: rare, 2: épique.
         """
         if row == 0:
-            return 0
-        if row == rows - 1:
             return 2
-        x = row / (rows - 1)
+        if row == rows - 1:
+            return 0
+        
+        x = (rows - 1 - row) / (rows - 1)
+        
         w0 = max(0.0, 1.0 - 1.5 * x)         # décroît
         w1 = 0.5 + 0.5 * (1 - abs(2 * x - 1))# cloche centrale
         w2 = 0.2 + 1.3 * x                   # croît

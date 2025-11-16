@@ -12,7 +12,7 @@ class joueur:
         self.orr = 0
         self.gemmes = 100
         self.cles = 100
-        self.des = 0
+        self.des = 100
         
         # Objets permanants que le joueur trouvera 
         self.objet_permanents={}
