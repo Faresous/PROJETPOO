@@ -67,7 +67,7 @@ def load_room_images():
 
 class UIState(Enum):
     """
-    États possibles de l’interface BluePrince.
+    États possibles de l'interface BluePrince.
 
     - MENU : menu principal.
     - PLAYING : partie en cours (déplacement via portes).
@@ -75,6 +75,7 @@ class UIState(Enum):
     - OPTIONS : paramètres.
     - QUITTING : sortie du jeu.
     - GAME_OVER : plus de pas.
+    - WIN : victoire.
     """
     MENU     = 0
     PLAYING  = 1
@@ -82,6 +83,7 @@ class UIState(Enum):
     OPTIONS  = 3
     QUITTING = 4
     GAME_OVER = 5
+    WIN = 6
 
 # ===============
 #  MENU PRINCIPAL 
@@ -597,6 +599,20 @@ def draw_game_over(screen, font, big):
     screen.blit(txt, txt.get_rect(center=(W//2, H//2 - 20)))
     screen.blit(sub, sub.get_rect(center=(W//2, H//2 + 20)))
 
+# ===========
+#  WIN
+# ===========
+
+def draw_win(screen, font, big):
+    """
+    Affiche l'écran WIN lorsque le joueur rentre dans l'anti-chambre.
+    """
+    screen.fill((0,0,0))
+    txt = big.render("Welcome to the anti-chamber", True, (80, 200, 120))
+    sub = font.render("YOU WIN ! — Press SPACE to return to menu", True, (220,220,220))
+    screen.blit(txt, txt.get_rect(center=(W//2, H//2 - 20)))
+    screen.blit(sub, sub.get_rect(center=(W//2, H//2 + 20)))
+
 # ======
 #  MAIN
 # ======
@@ -658,6 +674,21 @@ def main():
         # ------------ GAME OVER ----------------
         if state == UIState.GAME_OVER:
             draw_game_over(screen, font, big)
+            pg.display.flip()
+
+            for e in pg.event.get():
+                if e.type == pg.QUIT:
+                    return 0
+                if e.type == pg.KEYDOWN and e.key in (pg.K_SPACE, pg.K_RETURN):
+                    state = UIState.MENU
+                    continue
+
+            clock.tick(FPS)
+            continue
+
+        # ------------ WINNER ----------------
+        if state == UIState.WIN:
+            draw_win(screen, font, big)
             pg.display.flip()
 
             for e in pg.event.get():
@@ -761,6 +792,13 @@ def main():
                             player.move(dep_ligne, dep_colonne)
                             step_flash = "-1"
                             step_flash_time = 1.0
+
+                            # victoire : entrée dans l’antichambre
+                            
+                            if (player.ligne, player.colonne) == ANTI_POS:
+                                state = UIState.WIN
+                                continue
+
                             
                         except ValueError:
                             last_message = "Plus de pas !"
