@@ -45,30 +45,30 @@ ASSETS   = os.path.join(BASE_DIR, "assets")
 
 # Résumé court des effets utiles, basés sur spec.desc
 ROOM_SHORT_EFFECT = {
-    "BEDROOM": "Gain 2 steps when entering.",
-    "GUEST_BEDROOM": "+10 steps when entering.",
-    "NURSERY": "+5 steps when you draft a Bedroom.",
-    "SERVANTS_QUARTERS": "+1 step per Bedroom you own.",
-    "MASTER_BEDROOM": "+1 step per room.",
-    "BUNK_ROOM": "Counts as 2 Bedrooms.",
-    "HER_LADYSHIPS_CHAMBER": "Boosts Boudoir & Closet.",
-    "CLOISTER": "Garden hub (4 exits).",
-    "PATIO": "Spread gems in Green Rooms.",
-    "GREENHOUSE": "More Green Rooms in draft.",
-    "TERRACE": "Green Rooms cost 0 gems.",
-    "MORNING_ROOM": "+2 gems & +2 steps next day.",
-    "SECRET_GARDEN": "Fruit spread effect.",
-    "COMMISSARY": "Items for sale.",
-    "KITCHEN": "Food for sale.",
-    "LOCKSMITH": "Keys for sale.",
-    "SHOWROOM": "Luxury items for sale.",
-    "BOOKSHOP": "Books for sale.",
-    "GYMNASIUM": "Lose 2 steps when entering.",
-    "CHAPEL": "Lose 1 step when entering.",
-    "WEIGHT_ROOM": "Lose half your steps.",
-    "DARKROOM": "No Floor Plan visibility.",
-    "ARCHIVES": "Only 1 Floor Plan visible.",
-    "FURNACE": "More Red Rooms in draft.",
+    "BEDROOM": "Gain 2 steps when entering",
+    "GUEST_BEDROOM": "+10 Steps when entering",
+    "NURSERY": "+5 Steps when you draft a Bedroom",
+    "SERVANTS_QUARTERS": "+1 Step per Bedroom you own",
+    "MASTER_BEDROOM": "+1 Step per room",
+    "BUNK_ROOM": "Counts as 2 Bedrooms",
+    "HER_LADYSHIPS_CHAMBER": "Boosts Boudoir & Closet",
+    "CLOISTER": "Garden hub (4 exits)",
+    "PATIO": "Spread gems in Green Rooms",
+    "GREENHOUSE": "More Green Rooms in draft",
+    "TERRACE": "Green Rooms cost 0 gems",
+    "MORNING_ROOM": "+2 Gems & +2 Steps next day",
+    "SECRET_GARDEN": "Fruit spread effect",
+    "COMMISSARY": "Items for sale",
+    "KITCHEN": "Food for sale",
+    "LOCKSMITH": "Keys for sale",
+    "SHOWROOM": "Luxury items for sale",
+    "BOOKSHOP": "Books for sale",
+    "GYMNASIUM": "Lose 2 steps when entering",
+    "CHAPEL": "Lose 1 step when entering",
+    "WEIGHT_ROOM": "Lose half your steps",
+    "DARKROOM": "No Floor Plan visibility",
+    "ARCHIVES": "Only 1 Floor Plan visible",
+    "FURNACE": "More Red Rooms in draft",
 }
 
 # ============================================================
@@ -750,6 +750,15 @@ def draw_draft(screen, font, big, draft_list, focus_idx, icons):
             rect = pg.Rect(xs[i] - img_size//2, slot_y - img_size//2, img_size, img_size)
             pg.draw.rect(screen, (0,120,255), rect, width=3, border_radius=10)
 
+        selected_spec, _ = draft_list[focus_idx]
+        effect_description = ROOM_SHORT_EFFECT.get(selected_spec.key)
+        
+        if effect_description:
+            x_pos = x0 + (SIDEBAR_W // 2)
+            y_pos = 280
+            
+            txt = font.render(effect_description, True, TEXT_DARK)
+            screen.blit(txt, txt.get_rect(center=(x_pos, y_pos)))
     # ====================================
     # Boutons Reroll / Use Object (bas)
     # ====================================
