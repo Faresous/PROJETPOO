@@ -5,6 +5,11 @@ import random
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
 from typing import Dict, Optional, Any, Tuple, List
+from objets import (
+    Pelle, Marteau, Kit_de_crochetage, Detecteur_de_metaux, Patte_de_lapin,
+    Pomme, Banane, Gateau, Sandwich, Repas, 
+    coffre, endroits_ou_creuser, casier
+)
 
 # =========================================================
 # Constantes et RNG
@@ -186,6 +191,48 @@ class Room:
                 active = rng.sample(list(self.doors.keys()), k=min(2, len(self.doors)))
                 self.effects["active_doors"] = [d.value for d in active]
 
+        interactifs = []      # Coffres, Casiers ... ect
+        objets_a_ramasser = []        # Pommes, Pelles ... ect
+        spec = self.spec
+        
+        if spec.color == RoomColor.GREEN:
+            interactifs.append(endroits_ou_creuser())
+            
+            if rng.randint(1, 3) == 1: 
+                objets_a_ramasser.append(Pelle())
+            if rng.randint(1, 5) == 1: 
+                objets_a_ramasser.append(rng.choice([Patte_de_lapin(), Detecteur_de_metaux()]))
+        
+        elif spec.color == RoomColor.VIOLET:
+            if rng.randint(1, 2) == 1:
+                objets_a_ramasser.append(rng.choice([Pomme(), Banane(), Gateau()]))
+            
+        if spec.key == "VAULT":
+            interactifs.append(coffre())
+        
+        elif spec.key == "DEN":
+            if rng.randint(1, 2) == 1: 
+                interactifs.append(coffre())    
+                
+        elif spec.key == "LOCKER_ROOM":
+            interactifs.append(casier())
+            
+        elif spec.key == "KITCHEN":
+            objets_a_ramasser.append(Pomme())
+            objets_a_ramasser.append(Sandwich())   
+            
+        elif spec.key == "UTILITY_CLOSET":
+            if rng.randint(1, 2) == 1:
+                objets_a_ramasser.append(Marteau())
+            if rng.randint(1, 2) == 1:
+                objets_a_ramasser.append(Kit_de_crochetage())
+                
+        elif spec.key == "DINING_ROOM":
+            objets_a_ramasser.append(Repas())
+                     
+        self.effects["interactifs"] = interactifs
+        self.effects["objets_a_ramasser"] = objets_a_ramasser
+             
     def rotate_rotunda(self) -> None:
         """
         Fait pivoter les deux portes actives d'une ROTUNDA d'un cran horaire.
