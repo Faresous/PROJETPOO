@@ -42,9 +42,39 @@ ANTI_POS  = (0,         COLS // 2)
 BASE_DIR = os.path.dirname(__file__)
 ASSETS   = os.path.join(BASE_DIR, "assets")
 
+
+# Résumé court des effets utiles, basés sur spec.desc
+ROOM_SHORT_EFFECT = {
+    "BEDROOM": "Gain 2 steps when entering.",
+    "GUEST_BEDROOM": "+10 steps when entering.",
+    "NURSERY": "+5 steps when you draft a Bedroom.",
+    "SERVANTS_QUARTERS": "+1 step per Bedroom you own.",
+    "MASTER_BEDROOM": "+1 step per room.",
+    "BUNK_ROOM": "Counts as 2 Bedrooms.",
+    "HER_LADYSHIPS_CHAMBER": "Boosts Boudoir & Closet.",
+    "CLOISTER": "Garden hub (4 exits).",
+    "PATIO": "Spread gems in Green Rooms.",
+    "GREENHOUSE": "More Green Rooms in draft.",
+    "TERRACE": "Green Rooms cost 0 gems.",
+    "MORNING_ROOM": "+2 gems & +2 steps next day.",
+    "SECRET_GARDEN": "Fruit spread effect.",
+    "COMMISSARY": "Items for sale.",
+    "KITCHEN": "Food for sale.",
+    "LOCKSMITH": "Keys for sale.",
+    "SHOWROOM": "Luxury items for sale.",
+    "BOOKSHOP": "Books for sale.",
+    "GYMNASIUM": "Lose 2 steps when entering.",
+    "CHAPEL": "Lose 1 step when entering.",
+    "WEIGHT_ROOM": "Lose half your steps.",
+    "DARKROOM": "No Floor Plan visibility.",
+    "ARCHIVES": "Only 1 Floor Plan visible.",
+    "FURNACE": "More Red Rooms in draft.",
+}
+
 # ============================================================
 #  AJOUT : dictionnaire global contenant les images des salles
 # ============================================================
+
 ROOM_IMAGES = {}
 
 def load_room_images():
@@ -551,63 +581,93 @@ def draw_sidebar(screen, font, big, player: joueur, current_room_name, icons, la
 # =======
 
 def draw_draft(screen, font, big, draft_list, focus_idx, icons):
-    """ Affiche les 3 salles à sélectionner """
+    """
+    Affiche les 3 salles du draft :
+       
+    """
+
     x0 = BOARD_W
     screen.fill((240,240,240), pg.Rect(x0,0,SIDEBAR_W,H))
 
-    title = big.render("Choose a room to draft", True, TEXT_DARK)
-    screen.blit(title, (x0+80, 40))
+    # Titre du draft
+    title = big.render("Choose a Room to Draft", True, TEXT_DARK)
+    screen.blit(title, (x0 + 90, 40))
 
-    xs = [x0+90, x0+220, x0+350]   # positions horizontales
-    img_size = 80                 # taille des images
+    # Position des 3 emplacements (espacés)
+    xs = [x0 + 120, x0 + 260, x0 + 400]
+    slot_y = 150     # hauteur des images
+    img_size = 100   # taille des vignettes
+
+    # Icône gemmes
+    gem_icon = icons.get("gems")
 
     for i, entry in enumerate(draft_list):
 
-        # gestion tuple (spec, rotation) ou juste spec
-        if isinstance(entry, tuple):
-            spec, rotation = entry
-        else:
-            spec = entry
+        # IMPORTANT : entry = (spec, rotation)
+        spec, rotation = entry
 
-        # IMAGE
+        # ============================
+        # 1) Image de la salle (centrée)
+        # ============================
         img = ROOM_IMAGES.get(spec.key)
         if img:
             room_img = pg.transform.smoothscale(img, (img_size, img_size))
-            screen.blit(room_img, room_img.get_rect(center=(xs[i], 170)))
+            pos = room_img.get_rect(center=(xs[i], slot_y))
+            screen.blit(room_img, pos)
         else:
+            # rectangle vide (sécurité)
             pg.draw.rect(screen, (200,200,200),
-                         pg.Rect(xs[i]-img_size//2, 170-img_size//2, img_size, img_size))
+                         pg.Rect(xs[i]-img_size//2, slot_y-img_size//2, img_size, img_size))
 
-        # NOM
-        col = (0,120,255) if i==focus_idx else TEXT_DARK
-        txt = font.render(spec.name, True, col)
-        screen.blit(txt, txt.get_rect(center=(xs[i], 260)))
+        # ============================
+        # 2) Nom de la salle (gestion long)
+        # ============================
+        name_y = slot_y + img_size//2 + 18
+        name_color = (0,120,255) if i == focus_idx else TEXT_DARK
 
-        # ==== AFFICHAGE COST GEMS ====
-        cost = spec.cost_gems if spec.cost_gems else 0
+        # si nom trop long → descendre
+        if len(spec.name) > 14:
+            name_y += 10
 
-        if cost > 0:
-            gem_icon = icons.get("gems")
-            if gem_icon:
-                gem_small = pg.transform.smoothscale(gem_icon, (20,20))
-                screen.blit(gem_small, (xs[i] - 10, 290))
+        name_txt = font.render(spec.name, True, name_color)
+        screen.blit(name_txt, name_txt.get_rect(center=(xs[i], name_y)))
 
+        # ============================
+        # 3) Coût en gemmes
+        # ============================
+        cost = spec.cost_gems or 0
+        if cost > 0 and gem_icon:
+            gem_y = name_y + 20
+            # icône
+            screen.blit(gem_icon, gem_icon.get_rect(center=(xs[i] - 12, gem_y)))
+            # nombre
             cost_txt = font.render(str(cost), True, (0,0,0))
-            screen.blit(cost_txt, (xs[i] + 12, 292))
+            screen.blit(cost_txt, cost_txt.get_rect(center=(xs[i] + 12, gem_y)))
 
-        # CADRE DE SÉLECTION
+        # ============================
+        # (OPTION FUTUR) Effet spécial
+        # ============================
+        # special = extract_useful_effect(spec.desc)
+        # if special:
+        #     spec_y = gem_y + 22
+        #     txt = font.render(special, True, (50,50,50))
+        #     screen.blit(txt, txt.get_rect(center=(xs[i], spec_y)))
+
+        # ============================
+        # Cadre bleu autour de la salle sélectionnée
+        # ============================
         if i == focus_idx:
-            rect = pg.Rect(xs[i]-img_size//2, 170-img_size//2, img_size, img_size)
-            pg.draw.rect(screen, (0,120,255), rect, width=3, border_radius=8)
+            rect = pg.Rect(xs[i] - img_size//2, slot_y - img_size//2, img_size, img_size)
+            pg.draw.rect(screen, (0,120,255), rect, width=3, border_radius=10)
 
-    # bouton reroll
+    # ====================================
+    # Boutons Reroll / Use Object (bas)
+    # ====================================
     rr = big.render("Redraw (R)", True, (60,60,60))
-    screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 340)))
+    screen.blit(rr, rr.get_rect(center=(x0 + SIDEBAR_W//2, 360)))
 
-    # bouton utiliser
-    uu = big.render("Use Object (U)", True, (80,200,120))
-    screen.blit(uu, uu.get_rect(center=(x0 + SIDEBAR_W//2, 400)))
-
+    use = big.render("Use Object (U)", True, (28,160,110))
+    screen.blit(use, use.get_rect(center=(x0 + SIDEBAR_W//2, 400)))
 
 # ===========
 #  GAME OVER
